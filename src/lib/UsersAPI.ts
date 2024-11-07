@@ -1,11 +1,13 @@
-import { ProfileFormInputs } from '@/app/(protected)/profile/components/ProfileForm';
 import { toast } from '@/components/ui/use-toast';
 import { api } from '@/lib/api';
 import Response from '@/types/Response';
 import { UserPaginatedData } from '@/types/User';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useLogout } from './AuthenticationAPI';
 import User from '@/types/User';
+import { UserInput } from '@/components/AppUserForm';
+import { getServerSession } from 'next-auth';
+import AuthOptions from '@/lib/AuthOptions';
+
 
 export const getUsers = async (
   page: number = 1,
@@ -32,31 +34,6 @@ export const getUsers = async (
   };
 };
 
-
-export const updateUser = async (
-  id: string,
-  params: ProfileFormInputs
-): Promise<Response> => {
-  const fd = new FormData();
-  fd.append('_method', 'put');
-  for (const item in params) {
-    fd.append(item, params[item as keyof ProfileFormInputs]);
-  }
-  const { data } = await api.post<Response>(`/api/users/${id}`, fd, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  return data;
-};
-
-export const deleteUser = async (id: string): Promise<Response> => {
-  const { data } = await api.delete<Response>(`/api/users/${id}`);
-  return data;
-};
-
-/* HOOKS */
-
 export const useUsers = (
   page: number = 1,
   pageSize: number = 10,
@@ -71,29 +48,68 @@ export const useUsers = (
     },
   });
 
-export const useUpdateUser = () => {
-  const { mutate: logout } = useLogout();
+export const createUser = async (inputs: UserInput): Promise<Response> => {
+  const response = await api.post<Response>(`/api/user`, inputs);
+  return response.data;
+};
 
+export const updateUser = async (id: string, inputs: UserInput): Promise<Response> => {
+  const response = await api.put<Response>(`/api/user/${id}`, inputs);
+  return response.data;
+};
+
+export const deleteUser = async (id: string): Promise<Response> => {
+  const response = await api.delete(`/api/user/${id}`);
+  return response.data;
+};
+
+export const useCreateUser = () => {
   return useMutation({
-    mutationFn: async ({
-      id,
-      params,
-    }: {
-      id: string;
-      params: ProfileFormInputs;
-    }) => {
-      return await updateUser(id, params);
+    mutationFn: async (inputs: UserInput) => {
+      return await createUser(inputs);
     },
-    onSuccess: async (response) => {
-      logout();
-
-      // SHOW MESSAGE
-      toast({
-        variant: 'success',
-        description: response.message,
-      });
+    onSuccess: (response) => {
+      if (response && response.status === "success") {
+        toast({
+          variant: 'success',
+          description: response.message,
+        });
+      }
     },
   });
 };
 
-/* END HOOKS */
+export const useUpdateUser = () => {
+  return useMutation({
+    mutationFn: async ({ id, userData }: { id: string; userData: UserInput }) => {
+      return await updateUser(id, userData);
+    },
+    onSuccess: async (response) => {
+      console.log("response update", response)
+      if (response && response.status === "success") {
+        toast({
+          variant: 'success',
+          description: response.message,
+        });
+      }
+      await getServerSession(AuthOptions);
+    },
+  });
+};
+
+export const useDeleteUser = () => {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      return await deleteUser(id);
+    },
+    onSuccess: (response) => {
+      if (response && response.status === "success") {
+        toast({
+          variant: 'success',
+          description: response.message,
+        });
+      }
+    },
+  });
+};
+

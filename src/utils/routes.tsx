@@ -16,6 +16,7 @@ import {
   Wallet,
   Route,
   Bus,
+  HomeIcon
 } from 'lucide-react';
 
 interface Route {
@@ -123,14 +124,23 @@ const routes: Route[] = [
   //   isSidebarVisible: true,
   //   child_routes: [],
   // },
+
   {
-    route: '/routes',
-    title: 'Route',
-    icon: <Route />,
+    route: '/terminal',
+    title: 'Terminal',
+    icon: <HomeIcon />,
     roles: ['admin'],
     isSidebarVisible: true,
     child_routes: [],
   },
+  // {
+  //   route: '/routes',
+  //   title: 'Route',
+  //   icon: <Route />,
+  //   roles: ['admin'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
   // {
   //   route: '/informative-videos',
   //   title: 'Informative Videos',

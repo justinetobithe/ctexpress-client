@@ -16,19 +16,26 @@ import {
 } from "@/components/ui/tooltip"
 import { Skeleton } from '@/components/ui/skeleton';
 import AppTable from '@/components/AppTable';
-import { ArrowUpDown, Eye, XCircle } from 'lucide-react';
+import { ArrowUpDown, Pencil, XCircle, Trash } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import AppMotherInfo from '@/components/mothers/AppMotherInfo';
 import User from '@/types/User';
-import { useUsers } from '@/lib/UsersAPI';
+import { useDeleteUser, useUpdateUser, useUsers } from '@/lib/UsersAPI';
+import AppConfirmationDialog from './AppConfirmationDialog';
+import { toast } from '@/components/ui/use-toast';
+import AppUserForm from './AppUserForm';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function AppUsersTable() {
+  const queryClient = useQueryClient();
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
   const [searchKeyword, setSearchKeyword] = React.useState('');
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
 
   const { data, isLoading } = useUsers(
     pageIndex + 1,
@@ -37,6 +44,24 @@ export default function AppUsersTable() {
     sorting.map((item) => item.id).join(','),
     Boolean(sorting.map((item) => item.desc).join(','))
   );
+
+  const { mutate } = useDeleteUser();
+  const { mutate: updateUser } = useUpdateUser();
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setIsEditUserDialogOpen(true);
+  };
+
+  const handleDeleteUser = (id: string) => {
+    mutate(id.toString(), {
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['users']
+        });
+      }
+    });
+  };
 
   const [rowSelection, setRowSelection] = useState({});
   const columns: ColumnDef<User>[] = [
@@ -87,7 +112,7 @@ export default function AppUsersTable() {
           variant='ghost'
           className='pl-0 text-left hover:!bg-transparent'
         >
-          Contact Number
+          Phone
         </Button>
       ),
       cell: ({ row }) => {
@@ -111,19 +136,39 @@ export default function AppUsersTable() {
       },
     },
     {
+      accessorKey: 'role',
+      header: () => (
+        <Button
+          variant='ghost'
+          className='pl-0 text-left hover:!bg-transparent'
+        >
+          Role
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const item = row.original;
+        return <div>{item.role.charAt(0).toUpperCase() + item.role.slice(1).toLowerCase()}</div>;
+      },
+    },
+    {
       id: 'actions',
       header: () => <div className='text-center'>Actions</div>,
       cell: ({ row }) => {
         const item = row.original;
         return (
-          <div>
+          <div className="flex justify-center items-center">
             <Dialog>
               <DialogTrigger asChild>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button type='button' variant="outline" className="mr-2">
-                        <Eye className="h-4 w-4" />
+                      <Button
+                        type='button'
+                        variant="outline"
+                        className="mr-2"
+                        onClick={() => handleEditUser(item)}
+                      >
+                        <Pencil className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -132,28 +177,29 @@ export default function AppUsersTable() {
                   </Tooltip>
                 </TooltipProvider>
               </DialogTrigger>
-              <DialogTrigger asChild>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button type='button' variant="destructive">
-                        <XCircle className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Delete</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </DialogTrigger>
+              <AppConfirmationDialog
+                title='Delete User'
+                description={`Are you sure you want to delete the user "${item.first_name} ${item.last_name}"? This action cannot be undone.`}
+                buttonElem={
+                  <Button
+                    className="text-white"
+                    variant="destructive"
+                    type='button'
+                    style={{ marginLeft: '8px' }}
+                  >
+                    <Trash size={20} />
+                  </Button>
+                }
+                handleDialogAction={() => handleDeleteUser(item.id!)}
+              />
             </Dialog>
           </div>
-
         );
       },
       enableSorting: false,
       enableHiding: false,
-    },
+    }
+
   ];
 
   const pagination = React.useMemo(
@@ -189,5 +235,17 @@ export default function AppUsersTable() {
     },
   });
 
-  return <AppTable table={table} />;
+  return (
+    <div>
+      <AppTable table={table} />
+      {selectedUser && (
+        <AppUserForm
+          data={selectedUser}
+          isOpen={isEditUserDialogOpen}
+          onClose={() => setIsEditUserDialogOpen(false)}
+          queryClient={queryClient}
+        />
+      )}
+    </div>
+  );
 }
