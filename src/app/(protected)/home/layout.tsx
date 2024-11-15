@@ -7,9 +7,7 @@ const Layout: FC<{
   operator: React.ReactNode;
 }> = async ({ admin, operator }) => {
   const session = await getServerSession(AuthOptions);
-
-  console.log("session", session)
-
+  
   const renderContent = () => {
     switch (session?.user.role) {
       case 'admin':

@@ -1,3 +1,5 @@
+import { Vehicle } from "./Vehicle";
+
 // MAIN
 export default interface User {
   id: string;
@@ -11,6 +13,9 @@ export default interface User {
   image?: string | null;
   role: string;
   token?: string;
+  email_verified?: string
+
+  vehicle?: Vehicle;
 }
 
 

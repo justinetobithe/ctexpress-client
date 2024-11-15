@@ -10,13 +10,15 @@ import {
   Youtube,
   BadgeCheck,
   UserSquare,
-  BookUser,
   BookCheck,
   Users,
   Wallet,
   Route,
   Bus,
-  HomeIcon
+  HomeIcon,
+  FileLock,
+  MapPinIcon,
+  BookUser
 } from 'lucide-react';
 
 interface Route {
@@ -37,10 +39,18 @@ const routes: Route[] = [
     child_routes: [],
   },
   {
+    route: '/bookings',
+    title: 'Bookings',
+    icon: <BookUser />,
+    roles: ['admin', 'operator'],
+    isSidebarVisible: true,
+    child_routes: [],
+  },
+  {
     route: '/trip',
     title: 'Trip',
-    icon: <Bus />,
-    roles: ['admin'],
+    icon: <MapPinIcon />,
+    roles: ['admin', 'operator'],
     isSidebarVisible: true,
     child_routes: [],
   },
@@ -84,14 +94,6 @@ const routes: Route[] = [
   //   isSidebarVisible: true,
   //   child_routes: [],
   // },
-  {
-    route: '/appointment',
-    title: 'Book Appointment',
-    icon: null,
-    roles: ['mother', 'ob_gyne'],
-    isSidebarVisible: false,
-    child_routes: [],
-  },
   // {
   //   route: '/book-appointment',
   //   title: 'Book Appointment',
@@ -133,6 +135,15 @@ const routes: Route[] = [
     isSidebarVisible: true,
     child_routes: [],
   },
+
+  {
+    route: '/vehicle',
+    title: 'Vehicle',
+    icon: <Bus />,
+    roles: ['admin'],
+    isSidebarVisible: true,
+    child_routes: [],
+  },
   // {
   //   route: '/routes',
   //   title: 'Route',
@@ -153,10 +164,18 @@ const routes: Route[] = [
     route: '/payments',
     title: 'Payments',
     icon: <Wallet />,
-    roles: ['admin', 'ob_gyne'],
+    roles: ['admin', 'operator'],
     isSidebarVisible: true,
     child_routes: [],
   },
+  // {
+  //   route: '/history',
+  //   title: 'History',
+  //   icon: <FileLock />,
+  //   roles: ['admin'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
   {
     route: '/users-list',
     title: 'Users List',

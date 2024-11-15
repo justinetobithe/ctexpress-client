@@ -20,10 +20,10 @@ import { Terminal } from '@/types/Terminal';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 const terminalSchema = z.object({
-    id: z.string().optional(),
+    id: z.number().optional(),
     name: z.string().min(3, { message: 'Name is required' }),
-    longitude: z.number().min(-180, { message: 'Longitude must be between -180 and 180' }).max(180),
-    latitude: z.number().min(-90, { message: 'Latitude must be between -90 and 90' }).max(90),
+    longitude: z.string().min(3, { message: 'Longitude must be between -180 and 180' }).max(180),
+    latitude: z.string().min(3, { message: 'Latitude must be between -90 and 90' }).max(90),
 });
 
 export type TerminalInput = z.infer<typeof terminalSchema>;
@@ -41,9 +41,10 @@ const AppTerminalForm: FC<AppTerminalFormProps> = ({ data, isOpen, onClose, quer
     const form = useForm<TerminalInput>({
         resolver: zodResolver(terminalSchema),
         defaultValues: {
+            id: data?.id,
             name: data?.name || '',
-            longitude: data?.longitude || 0,
-            latitude: data?.latitude || 0,
+            longitude: data?.longitude || '',
+            latitude: data?.latitude || '',
         },
     });
 
@@ -62,29 +63,27 @@ const AppTerminalForm: FC<AppTerminalFormProps> = ({ data, isOpen, onClose, quer
 
     const onSubmit = async (formData: TerminalInput) => {
         setLoading(true);
-        const terminalData = { ...formData, id: formData.id ?? '' };
 
         if (data && data.id) {
             await updateTerminal(
-                { id: data.id, terminalData },
+                { id: data.id, terminalData: formData },
                 {
                     onSettled: () => {
                         onClose();
-                        queryClient.invalidateQueries({ queryKey: ['terminals'] });
+                        queryClient.invalidateQueries({ queryKey: ['trips'] });
                     },
                 }
             );
         } else {
-            await createTerminal(terminalData, {
+            await createTerminal(formData, {
                 onSettled: () => {
                     onClose();
-                    queryClient.invalidateQueries({ queryKey: ['terminals'] });
+                    queryClient.invalidateQueries({ queryKey: ['trips'] });
                 },
             });
         }
         setLoading(false);
     };
-
 
     return (
         <AlertDialog open={isOpen}>
@@ -115,7 +114,7 @@ const AppTerminalForm: FC<AppTerminalFormProps> = ({ data, isOpen, onClose, quer
                                     <FormItem>
                                         <FormLabel>Longitude</FormLabel>
                                         <FormControl>
-                                            <Input type='number' {...field} />
+                                            <Input type='text' {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -128,7 +127,7 @@ const AppTerminalForm: FC<AppTerminalFormProps> = ({ data, isOpen, onClose, quer
                                     <FormItem>
                                         <FormLabel>Latitude</FormLabel>
                                         <FormControl>
-                                            <Input type='number' {...field} />
+                                            <Input type='text' {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

@@ -18,14 +18,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import AppTable from '@/components/AppTable';
 import { ArrowUpDown, Pencil, Trash } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { Terminal } from '@/types/Terminal';
-import { useDeleteTerminal, useUpdateTerminal, useTerminals } from '@/lib/TerminalAPI';
+import { Vehicle } from '@/types/Vehicle';
+import { useDeleteVehicle, useUpdateVehicle, useVehicles } from '@/lib/VehicleAPI';
 import AppConfirmationDialog from './AppConfirmationDialog';
 import { toast } from '@/components/ui/use-toast';
-import AppTerminalForm from './AppTerminalForm';
+import AppVehicleForm from './AppVehicleForm';
 import { useQueryClient } from '@tanstack/react-query';
 
-export default function AppTerminalsTable() {
+export default function AppVehiclesTable() {
     const queryClient = useQueryClient();
     const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
         pageIndex: 0,
@@ -34,9 +34,9 @@ export default function AppTerminalsTable() {
     const [searchKeyword, setSearchKeyword] = React.useState('');
     const [sorting, setSorting] = useState<SortingState>([]);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const [selectedTerminal, setSelectedTerminal] = useState<Terminal | null>(null);
+    const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
-    const { data, isLoading } = useTerminals(
+    const { data, isLoading } = useVehicles(
         pageIndex + 1,
         pageSize,
         searchKeyword,
@@ -44,66 +44,117 @@ export default function AppTerminalsTable() {
         Boolean(sorting.map((item) => item.desc).join(','))
     );
 
-    const { mutate } = useDeleteTerminal();
-    const { mutate: updateTerminal } = useUpdateTerminal();
+    const { mutate } = useDeleteVehicle();
+    const { mutate: updateVehicle } = useUpdateVehicle();
 
-    const handleEditTerminal = (terminal: Terminal) => {
-        setSelectedTerminal(terminal);
+    const handleEditVehicle = (vehicle: Vehicle) => {
+        setSelectedVehicle(vehicle);
         setIsEditDialogOpen(true);
     };
 
-    const handleDeleteTerminal = (id: number) => {
+    const handleDeleteVehicle = (id: number) => {
         mutate(id, {
             onSettled: () => {
-                queryClient.invalidateQueries({ queryKey: ['terminals'] });
+                queryClient.invalidateQueries({ queryKey: ['vehicles'] });
             }
         });
     };
 
-    const columns: ColumnDef<Terminal>[] = [
+    const columns: ColumnDef<Vehicle>[] = [
         {
-            accessorKey: 'name',
+            accessorKey: 'license_plate',
             header: ({ column }) => (
                 <Button
                     variant='ghost'
                     className='pl-0 text-left hover:!bg-transparent'
                     onClick={() => column.toggleSorting()}
                 >
-                    Terminal
+                    Plate No.
                     <ArrowUpDown className='ml-2 h-4 w-4' />
                 </Button>
             ),
-            cell: ({ row }) => row.original.name,
+            cell: ({ row }) => row.original.license_plate,
             enableSorting: true,
         },
         {
-            accessorKey: 'longitude',
+            accessorKey: 'brand',
             header: ({ column }) => (
                 <Button
                     variant='ghost'
                     className='pl-0 text-left hover:!bg-transparent'
                     onClick={() => column.toggleSorting()}
                 >
-                    Longitude
+                    Brand
                     <ArrowUpDown className='ml-2 h-4 w-4' />
                 </Button>
             ),
-            cell: ({ row }) => row.original.longitude,
+            cell: ({ row }) => row.original.brand,
             enableSorting: true,
         },
         {
-            accessorKey: 'latitude',
+            accessorKey: 'model',
             header: ({ column }) => (
                 <Button
                     variant='ghost'
                     className='pl-0 text-left hover:!bg-transparent'
                     onClick={() => column.toggleSorting()}
                 >
-                    Latitude
+                    Model
                     <ArrowUpDown className='ml-2 h-4 w-4' />
                 </Button>
             ),
-            cell: ({ row }) => row.original.latitude,
+            cell: ({ row }) => row.original.model,
+            enableSorting: true,
+        },
+        {
+            accessorKey: 'year',
+            header: ({ column }) => (
+                <Button
+                    variant='ghost'
+                    className='pl-0 text-left hover:!bg-transparent'
+                    onClick={() => column.toggleSorting()}
+                >
+                    Year
+                    <ArrowUpDown className='ml-2 h-4 w-4' />
+                </Button>
+            ),
+            cell: ({ row }) => row.original.year,
+            enableSorting: true,
+        },
+        {
+            accessorKey: 'capacity',
+            header: ({ column }) => (
+                <Button
+                    variant='ghost'
+                    className='pl-0 text-left hover:!bg-transparent'
+                    onClick={() => column.toggleSorting()}
+                >
+                    Capacity
+                    <ArrowUpDown className='ml-2 h-4 w-4' />
+                </Button>
+            ),
+            cell: ({ row }) => row.original.capacity,
+            enableSorting: true,
+        },
+        {
+            accessorKey: 'driver',
+            header: ({ column }) => (
+                <Button
+                    variant='ghost'
+                    className='pl-0 text-left hover:!bg-transparent'
+                    onClick={() => column.toggleSorting()}
+                >
+                    Driver
+                    <ArrowUpDown className='ml-2 h-4 w-4' />
+                </Button>
+            ),
+            cell: ({ row }) => {
+                const driver = row.original.driver;
+                if (driver && driver.first_name && driver.last_name) {
+                    return `${driver.first_name} ${driver.last_name}`;
+                }
+                return "";
+            },
             enableSorting: true,
         },
         {
@@ -118,7 +169,7 @@ export default function AppTerminalsTable() {
                                     type='button'
                                     variant="outline"
                                     className="mr-2"
-                                    onClick={() => handleEditTerminal(row.original)}
+                                    onClick={() => handleEditVehicle(row.original)}
                                 >
                                     <Pencil className="h-4 w-4" />
                                 </Button>
@@ -129,14 +180,14 @@ export default function AppTerminalsTable() {
                         </Tooltip>
                     </TooltipProvider>
                     <AppConfirmationDialog
-                        title='Delete Terminal'
-                        description={`Are you sure you want to delete the terminal "${row.original.name}"? This action cannot be undone.`}
+                        title='Delete Vehicle'
+                        description={`Are you sure you want to delete the vehicle "${row.original.brand} ${row.original.model}"? This action cannot be undone.`}
                         buttonElem={
                             <Button className="text-white" variant="destructive" type='button'>
                                 <Trash size={20} />
                             </Button>
                         }
-                        handleDialogAction={() => handleDeleteTerminal(row.original.id!)}
+                        handleDialogAction={() => handleDeleteVehicle(row.original.id!)}
                     />
                 </div>
             ),
@@ -170,9 +221,9 @@ export default function AppTerminalsTable() {
     return (
         <div>
             <AppTable table={table} />
-            {selectedTerminal && (
-                <AppTerminalForm
-                    data={selectedTerminal}
+            {selectedVehicle && (
+                <AppVehicleForm
+                    data={selectedVehicle}
                     isOpen={isEditDialogOpen}
                     onClose={() => setIsEditDialogOpen(false)}
                     queryClient={queryClient}

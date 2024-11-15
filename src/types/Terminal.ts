@@ -1,6 +1,6 @@
-export type Terminal = {
-    id: string;
+export interface Terminal {
+    id?: number;
     name: string;
-    longitude: number;
-    latitude: number;
+    longitude: string;
+    latitude: string;
 };

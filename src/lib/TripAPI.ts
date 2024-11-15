@@ -1,17 +1,17 @@
 import { api } from '@/lib/api';
 import { toast } from '@/components/ui/use-toast';
 import Response from '@/types/Response';
-import { Terminal } from '@/types/Terminal';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Trip } from '@/types/Trip';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
-export const getTerminals = async (
+export const getTrips = async (
     page: number = 1,
     pageSize: number = 10,
     filter = '',
     sortColumn = '',
     sortDesc = false
-): Promise<{ data: Terminal[]; last_page: number }> => {
-    const response = await api.get<{ data: { data: Terminal[]; current_page: number; last_page: number; total: number } }>(`/api/terminals`, {
+): Promise<{ data: Trip[]; last_page: number }> => {
+    const response = await api.get<{ data: { data: Trip[]; current_page: number; last_page: number; total: number } }>(`/api/trips`, {
         params: {
             page,
             ...(pageSize && { page_size: pageSize }),
@@ -29,22 +29,22 @@ export const getTerminals = async (
     };
 };
 
-export const createTerminal = async (inputs: Terminal): Promise<Response> => {
-    const response = await api.post<Response>(`/api/terminal`, inputs);
+export const createTrip = async (inputs: Trip): Promise<Response> => {
+    const response = await api.post<Response>(`/api/trip`, inputs);
     return response.data;
 };
 
-export const updateTerminal = async (id: number, inputs: Terminal): Promise<Response> => {
-    const response = await api.put<Response>(`/api/terminal/${id}`, inputs);
+export const updateTrip = async (id: number, inputs: Trip): Promise<Response> => {
+    const response = await api.put<Response>(`/api/trip/${id}`, inputs);
     return response.data;
 };
 
-export const deleteTerminal = async (id: number): Promise<Response> => {
-    const response = await api.delete(`/api/terminal/${id}`);
+export const deleteTrip = async (id: number): Promise<Response> => {
+    const response = await api.delete(`/api/trip/${id}`);
     return response.data;
 };
 
-export const useTerminals = (
+export const useTrips = (
     page: number = 1,
     pageSize: number = 10,
     globalFilter = '',
@@ -52,35 +52,16 @@ export const useTerminals = (
     sortDesc = false
 ) =>
     useQuery({
-        queryKey: ['terminals', page, pageSize, globalFilter, sortColumn, sortDesc],
-        queryFn: async (): Promise<{ data: Terminal[]; last_page: number }> => {
-            return await getTerminals(page, pageSize, globalFilter, sortColumn, sortDesc);
+        queryKey: ['trips', page, pageSize, globalFilter, sortColumn, sortDesc],
+        queryFn: async (): Promise<{ data: Trip[]; last_page: number }> => {
+            return await getTrips(page, pageSize, globalFilter, sortColumn, sortDesc);
         },
     });
 
-export const useCreateTerminal = () => {
-    const queryClient = useQueryClient();
-    ``
+export const useCreateTrip = () => {
     return useMutation({
-        mutationFn: async (inputs: Terminal) => {
-            return await createTerminal(inputs);
-        },
-        onSuccess: (response) => {
-            if (response && response.status === "success") {
-                queryClient.invalidateQueries({ queryKey: ['trips'] });
-                toast({
-                    variant: 'success',
-                    description: response.message,
-                });
-            }
-        },
-    });
-};
-
-export const useUpdateTerminal = () => {
-    return useMutation({
-        mutationFn: async ({ id, terminalData }: { id: number; terminalData: Terminal }) => {
-            return await updateTerminal(id, terminalData);
+        mutationFn: async (inputs: Trip) => {
+            return await createTrip(inputs);
         },
         onSuccess: (response) => {
             if (response && response.status === "success") {
@@ -93,10 +74,26 @@ export const useUpdateTerminal = () => {
     });
 };
 
-export const useDeleteTerminal = () => {
+export const useUpdateTrip = () => {
+    return useMutation({
+        mutationFn: async ({ id, tripData }: { id: number; tripData: Trip }) => {
+            return await updateTrip(id, tripData);
+        },
+        onSuccess: (response) => {
+            if (response && response.status === "success") {
+                toast({
+                    variant: 'success',
+                    description: response.message,
+                });
+            }
+        },
+    });
+};
+
+export const useDeleteTrip = () => {
     return useMutation({
         mutationFn: async (id: number) => {
-            return await deleteTerminal(id);
+            return await deleteTrip(id);
         },
         onSuccess: (response) => {
             if (response && response.status === "success") {

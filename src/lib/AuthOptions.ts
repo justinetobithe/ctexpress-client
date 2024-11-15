@@ -17,11 +17,31 @@ const AuthOptions: AuthOptions = {
         },
         password: { label: 'Password', type: 'password' },
       },
+      // authorize: async (credentials) => {
+      //   const [response, error] = await login(
+      //     credentials?.email!,
+      //     credentials?.password!
+      //   );
+
+      //   if (error) {
+      //     throw new Error(error);
+      //   }
+
+      //   if (response?.data) {
+      //     return {
+      //       ...response.data.user,
+      //       auth_token: response.data.token,
+      //     };
+      //   }
+
+      //   return null;
+      // },
       authorize: async (credentials) => {
-        const [response, error] = await login(
-          credentials?.email!,
-          credentials?.password!
-        );
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Email or password is missing.");
+        }
+
+        const [response, error] = await login(credentials.email, credentials.password);
 
         if (error) {
           throw new Error(error);
@@ -85,9 +105,9 @@ const AuthOptions: AuthOptions = {
         token.id = user.id;
         token.role = user.role;
         token.auth_token = user.auth_token;
-        token.first_name = user.first_name ?? ''; 
-        token.last_name = user.last_name ?? '';   
-        token.phone = user.phone ?? '';            
+        token.first_name = user.first_name ?? '';
+        token.last_name = user.last_name ?? '';
+        token.phone = user.phone ?? '';
       }
       return token;
     },

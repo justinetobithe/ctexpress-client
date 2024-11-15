@@ -13,90 +13,99 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
-import { useCreateUser, useUpdateUser } from '@/lib/UsersAPI';
-import { Switch } from '@/components/ui/switch';
-import { zodResolver } from '@hookform/resolvers/zod';
-import User from "@/types/User";
+import { useCreateVehicle, useUpdateVehicle } from '@/lib/VehicleAPI';
 import AppSpinner from './AppSpinner';
 import { QueryClient } from '@tanstack/react-query';
+import { Vehicle } from '@/types/Vehicle';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Select from 'react-select';
+import { api } from '@/lib/api';
+import User from '@/types/User'
+import { Driver } from '@/types/Driver';
 
-const userSchema = z.object({
-    first_name: z.string().min(3, { message: 'First name is required' }),
-    last_name: z.string().min(3, { message: 'Last name is required' }),
-    email: z.string().email({ message: 'Email is invalid' }),
-    phone: z.string().optional(),
-    address: z.string().optional(),
-    role: z.string().min(3, { message: 'Role is required' }),
-    password: z.string().optional(),
-    new_password: z.string().optional(),
-    confirm_password: z.string().optional(),
-}).refine(data => data.new_password === data.confirm_password, {
-    message: "Passwords don't match",
-    path: ["confirm_password"],
+const vehicleSchema = z.object({
+    id: z.number().optional(),
+    driver_id: z.number().min(1, { message: 'Driver is required' }),
+    license_plate: z.string().min(1, { message: 'License plate is required' }),
+    brand: z.string().optional(),
+    model: z.string().optional(),
+    year: z.string().min(1, { message: 'Year is required' }),
+    capacity: z.string().min(1, { message: 'Capacity must be at least 1' }).optional(),
 });
 
-export type UserInput = z.infer<typeof userSchema>;
+export type VehicleInput = z.infer<typeof vehicleSchema>;
 
-interface AppUserFormProps {
-    data?: User;
+interface AppVehicleFormProps {
+    data?: Vehicle;
     isOpen: boolean;
     onClose: () => void;
     queryClient: QueryClient;
 }
 
-const roleOptions = [
-    { value: "admin", label: "admin" },
-    { value: "driver", label: "driver" },
-    { value: "operator", label: "operator" },
-    { value: "passenger", label: "passenger" },
-]
-
-const AppUserForm: FC<AppUserFormProps> = ({ data, isOpen, onClose, queryClient }) => {
+const AppVehicleForm: FC<AppVehicleFormProps> = ({ data, isOpen, onClose, queryClient }) => {
     const [loading, setLoading] = useState(false);
 
-    const form = useForm<UserInput>({
-        resolver: zodResolver(userSchema),
+    const [drivers, setDrivers] = useState<Driver[]>([]);
+
+    useEffect(() => {
+        const fetchDrivers = async () => {
+            try {
+                const response = await api.get<{ data: Driver[] }>('/api/drivers');
+                setDrivers(response.data.data);
+            } catch (error) {
+                console.error("Error fetching drivers:", error);
+            }
+        };
+        fetchDrivers();
+    }, []);
+
+    const form = useForm<VehicleInput>({
+        resolver: zodResolver(vehicleSchema),
         defaultValues: {
-            first_name: data?.first_name || '',
-            last_name: data?.last_name || '',
-            email: data?.email || '',
-            phone: data?.phone || '',
-            address: data?.address || '',
-            role: data?.role || '',
+            id: data?.id,
+            driver_id: data?.driver_id || undefined,
+            license_plate: data?.license_plate || '',
+            brand: data?.brand || '',
+            model: data?.model || '',
+            year: data?.year || '',
+            capacity: data?.capacity || '',
         },
     });
 
     useEffect(() => {
         if (data) {
             form.reset({
-                first_name: data.first_name,
-                last_name: data.last_name,
-                email: data.email,
-                phone: data.phone,
-                address: data.address,
-                role: data.role,
+                driver_id: data.driver_id,
+                license_plate: data.license_plate,
+                brand: data.brand,
+                model: data.model,
+                year: data.year,
+                capacity: data.capacity,
             });
         }
     }, [data, form]);
 
-    const { mutate: createUser, isPending: isCreating } = useCreateUser();
-    const { mutate: updateUser, isPending: isUpdating } = useUpdateUser();
+    const { mutate: createVehicle, isPending: isCreating } = useCreateVehicle();
+    const { mutate: updateVehicle, isPending: isUpdating } = useUpdateVehicle();
 
-    const onSubmit = async (formData: UserInput) => {
+    const onSubmit = async (formData: VehicleInput) => {
         setLoading(true);
+
         if (data && data.id) {
-            await updateUser({ id: data.id, userData: formData }, {
-                onSettled: () => {
-                    onClose();
-                    queryClient.invalidateQueries({ queryKey: ['users'] });
-                },
-            });
+            await updateVehicle(
+                { id: data.id, vehicleData: formData },
+                {
+                    onSettled: () => {
+                        onClose();
+                        queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+                    },
+                }
+            );
         } else {
-            await createUser(formData, {
+            await createVehicle(formData, {
                 onSettled: () => {
                     onClose();
-                    queryClient.invalidateQueries({ queryKey: ['users'] });
+                    queryClient.invalidateQueries({ queryKey: ['vehicles'] });
                 },
             });
         }
@@ -107,37 +116,32 @@ const AppUserForm: FC<AppUserFormProps> = ({ data, isOpen, onClose, queryClient 
         <AlertDialog open={isOpen}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>{data ? 'Edit User' : 'Add User'}</AlertDialogTitle>
+                    <AlertDialogTitle>{data ? 'Edit Vehicle' : 'Add Vehicle'}</AlertDialogTitle>
                 </AlertDialogHeader>
                 <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
                             <FormField
                                 control={form.control}
-                                name="role"
+                                name="driver_id"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Role</FormLabel>
                                         <Controller
                                             control={form.control}
-                                            name="role"
+                                            name="driver_id"
                                             render={({ field }) => (
                                                 <Select
-                                                    value={roleOptions.find(option => option.value === field.value) || null}
-                                                    onChange={(option) => {
-                                                        field.onChange(option?.value);
-                                                    }}
-                                                    options={roleOptions}
-                                                    menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                                    value={drivers.find(driver => driver.id === field.value) ? {
+                                                        value: field.value!,
+                                                        label: `${drivers.find(driver => driver.id === field.value)?.first_name} - ${drivers.find(driver => driver.id === field.value)?.last_name}`,
+                                                    } : null}
+                                                    options={drivers.map(driver => ({
+                                                        value: driver.id!,
+                                                        label: `${driver.first_name} - ${driver.last_name}`,
+                                                    }))}
+                                                    onChange={option => field.onChange(option?.value!)}
                                                     isClearable
-                                                    menuPlacement="auto"
-                                                    styles={{
-                                                        menuPortal: (base) => ({
-                                                            ...base,
-                                                            zIndex: 9991,
-                                                        }),
-                                                        input: (base) => ({ ...base, 'input:focus': { boxShadow: 'none' } }),
-                                                    }}
                                                 />
                                             )}
                                         />
@@ -147,10 +151,10 @@ const AppUserForm: FC<AppUserFormProps> = ({ data, isOpen, onClose, queryClient 
                             />
                             <FormField
                                 control={form.control}
-                                name='first_name'
+                                name='license_plate'
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>First Name</FormLabel>
+                                        <FormLabel>License Plate</FormLabel>
                                         <FormControl>
                                             <Input type='text' {...field} />
                                         </FormControl>
@@ -160,10 +164,10 @@ const AppUserForm: FC<AppUserFormProps> = ({ data, isOpen, onClose, queryClient 
                             />
                             <FormField
                                 control={form.control}
-                                name='last_name'
+                                name='brand'
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Last Name</FormLabel>
+                                        <FormLabel>Brand</FormLabel>
                                         <FormControl>
                                             <Input type='text' {...field} />
                                         </FormControl>
@@ -173,23 +177,10 @@ const AppUserForm: FC<AppUserFormProps> = ({ data, isOpen, onClose, queryClient 
                             />
                             <FormField
                                 control={form.control}
-                                name='email'
+                                name='model'
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Email</FormLabel>
-                                        <FormControl>
-                                            <Input type='email' {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name='phone'
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Phone</FormLabel>
+                                        <FormLabel>Model</FormLabel>
                                         <FormControl>
                                             <Input type='text' {...field} />
                                         </FormControl>
@@ -199,12 +190,25 @@ const AppUserForm: FC<AppUserFormProps> = ({ data, isOpen, onClose, queryClient 
                             />
                             <FormField
                                 control={form.control}
-                                name='address'
+                                name='year'
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Address</FormLabel>
+                                        <FormLabel>Year</FormLabel>
                                         <FormControl>
-                                            <Input type='text' {...field} />
+                                            <Input type='number' {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name='capacity'
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Capacity</FormLabel>
+                                        <FormControl>
+                                            <Input type='number' {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -224,4 +228,4 @@ const AppUserForm: FC<AppUserFormProps> = ({ data, isOpen, onClose, queryClient 
     );
 };
 
-export default AppUserForm;
+export default AppVehicleForm;

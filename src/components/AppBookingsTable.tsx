@@ -18,14 +18,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import AppTable from '@/components/AppTable';
 import { ArrowUpDown, Pencil, Trash } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { Terminal } from '@/types/Terminal';
-import { useDeleteTerminal, useUpdateTerminal, useTerminals } from '@/lib/TerminalAPI';
-import AppConfirmationDialog from './AppConfirmationDialog';
-import { toast } from '@/components/ui/use-toast';
-import AppTerminalForm from './AppTerminalForm';
+import { Booking } from '@/types/Booking';
+import { useBookings } from '@/lib/BookingAPI';
 import { useQueryClient } from '@tanstack/react-query';
+import moment from 'moment';
 
-export default function AppTerminalsTable() {
+export default function AppBookingsTable() {
     const queryClient = useQueryClient();
     const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
         pageIndex: 0,
@@ -33,10 +31,8 @@ export default function AppTerminalsTable() {
     });
     const [searchKeyword, setSearchKeyword] = React.useState('');
     const [sorting, setSorting] = useState<SortingState>([]);
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    const [selectedTerminal, setSelectedTerminal] = useState<Terminal | null>(null);
 
-    const { data, isLoading } = useTerminals(
+    const { data, isLoading } = useBookings(
         pageIndex + 1,
         pageSize,
         searchKeyword,
@@ -44,66 +40,124 @@ export default function AppTerminalsTable() {
         Boolean(sorting.map((item) => item.desc).join(','))
     );
 
-    const { mutate } = useDeleteTerminal();
-    const { mutate: updateTerminal } = useUpdateTerminal();
-
-    const handleEditTerminal = (terminal: Terminal) => {
-        setSelectedTerminal(terminal);
-        setIsEditDialogOpen(true);
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'pending':
+                return 'orange';
+            case 'approved':
+                return 'green';
+            case 'expired':
+                return 'red';
+            default:
+                return 'black';
+        }
     };
 
-    const handleDeleteTerminal = (id: number) => {
-        mutate(id, {
-            onSettled: () => {
-                queryClient.invalidateQueries({ queryKey: ['terminals'] });
-            }
-        });
-    };
-
-    const columns: ColumnDef<Terminal>[] = [
+    const columns: ColumnDef<Booking>[] = [
         {
-            accessorKey: 'name',
+            accessorKey: 'user',
             header: ({ column }) => (
                 <Button
                     variant='ghost'
                     className='pl-0 text-left hover:!bg-transparent'
                     onClick={() => column.toggleSorting()}
                 >
-                    Terminal
+                    User
                     <ArrowUpDown className='ml-2 h-4 w-4' />
                 </Button>
             ),
-            cell: ({ row }) => row.original.name,
+            cell: ({ row }) => `${row.original.user?.first_name} ${row.original.user?.last_name}`,
             enableSorting: true,
         },
         {
-            accessorKey: 'longitude',
+            accessorKey: 'booked',
             header: ({ column }) => (
                 <Button
                     variant='ghost'
                     className='pl-0 text-left hover:!bg-transparent'
                     onClick={() => column.toggleSorting()}
                 >
-                    Longitude
+                    Booked at
                     <ArrowUpDown className='ml-2 h-4 w-4' />
                 </Button>
             ),
-            cell: ({ row }) => row.original.longitude,
+            cell: ({ row }) => `${moment(row.original.trip?.trip_date).format('MMMM D, YYYY')}`,
             enableSorting: true,
         },
         {
-            accessorKey: 'latitude',
+            accessorKey: 'trip',
             header: ({ column }) => (
                 <Button
                     variant='ghost'
                     className='pl-0 text-left hover:!bg-transparent'
                     onClick={() => column.toggleSorting()}
                 >
-                    Latitude
+                    Trip
                     <ArrowUpDown className='ml-2 h-4 w-4' />
                 </Button>
             ),
-            cell: ({ row }) => row.original.latitude,
+            cell: ({ row }) => {
+                const tripDate = row.original.trip?.trip_date;
+                const startTime = row.original.trip?.start_time;
+
+                const formattedDate = moment(tripDate).format('MMMM D, YYYY h:mm A');
+                const formattedTime = startTime ? moment(startTime, ['HH:mm', 'HH:mm:ss']).format('h:mm A') : 'Invalid time';
+
+                return `${formattedDate} - ${formattedTime}`;
+            },
+            enableSorting: true,
+        },
+        {
+            accessorKey: 'driver',
+            header: ({ column }) => (
+                <Button
+                    variant='ghost'
+                    className='pl-0 text-left hover:!bg-transparent'
+                    onClick={() => column.toggleSorting()}
+                >
+                    Driver
+                    <ArrowUpDown className='ml-2 h-4 w-4' />
+                </Button>
+            ),
+            cell: ({ row }) => `${row.original.trip?.driver?.first_name} ${row.original.trip?.driver?.last_name}`,
+            enableSorting: true,
+        },
+        {
+            accessorKey: 'paid',
+            header: ({ column }) => (
+                <Button
+                    variant='ghost'
+                    className='pl-0 text-left hover:!bg-transparent'
+                    onClick={() => column.toggleSorting()}
+                >
+                    Payment
+                    <ArrowUpDown className='ml-2 h-4 w-4' />
+                </Button>
+            ),
+            cell: ({ row }) => (
+                <span className={row.original.paid === 1 ? 'text-green-600' : 'text-red-600'}>
+                    {row.original.paid === 1 ? "Paid" : "Unpaid"}
+                </span>
+            ),
+            enableSorting: true,
+        },
+        {
+            accessorKey: 'status',
+            header: ({ column }) => (
+                <Button
+                    variant='ghost'
+                    className='pl-0 text-left hover:!bg-transparent'
+                    onClick={() => column.toggleSorting()}
+                >
+                    Status
+                    <ArrowUpDown className='ml-2 h-4 w-4' />
+                </Button>
+            ),
+            cell: ({ row }) => (
+                <span className="capitalize" style={{ color: getStatusColor(row.original.status) }}>
+                    {row.original.status}
+                </span>
+            ),
             enableSorting: true,
         },
         {
@@ -118,7 +172,6 @@ export default function AppTerminalsTable() {
                                     type='button'
                                     variant="outline"
                                     className="mr-2"
-                                    onClick={() => handleEditTerminal(row.original)}
                                 >
                                     <Pencil className="h-4 w-4" />
                                 </Button>
@@ -128,22 +181,13 @@ export default function AppTerminalsTable() {
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-                    <AppConfirmationDialog
-                        title='Delete Terminal'
-                        description={`Are you sure you want to delete the terminal "${row.original.name}"? This action cannot be undone.`}
-                        buttonElem={
-                            <Button className="text-white" variant="destructive" type='button'>
-                                <Trash size={20} />
-                            </Button>
-                        }
-                        handleDialogAction={() => handleDeleteTerminal(row.original.id!)}
-                    />
                 </div>
             ),
             enableSorting: false,
             enableHiding: false,
         }
     ];
+
 
     const pagination = React.useMemo(() => ({ pageIndex, pageSize }), [pageIndex, pageSize]);
 
@@ -170,14 +214,7 @@ export default function AppTerminalsTable() {
     return (
         <div>
             <AppTable table={table} />
-            {selectedTerminal && (
-                <AppTerminalForm
-                    data={selectedTerminal}
-                    isOpen={isEditDialogOpen}
-                    onClose={() => setIsEditDialogOpen(false)}
-                    queryClient={queryClient}
-                />
-            )}
+
         </div>
     );
 }

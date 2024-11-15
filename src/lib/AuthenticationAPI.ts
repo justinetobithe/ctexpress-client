@@ -19,7 +19,7 @@ export const login = async (
   password: string
 ): Promise<[LoginResponse | null, string | null]> => {
   try {
-    const { data } = await api.post<LoginResponse>('/api/auth/login', {
+    const { data } = await api.post<LoginResponse>('/api/login', {
       email,
       password,
     });

@@ -1,6 +1,6 @@
 'use client';
 import React, { FC, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import z from 'zod';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -32,10 +32,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AlertDialogDescription } from '@radix-ui/react-alert-dialog';
 import AppSpinner from '@/components/AppSpinner';
-import DatePicker from 'react-date-picker';
-import 'react-date-picker/dist/DatePicker.css';
-import 'react-calendar/dist/Calendar.css';
-import moment from 'moment';
+import Select from 'react-select';
 
 const inputSchema = z
   .object({
@@ -61,19 +58,17 @@ const inputSchema = z
       .min(1, {
         message: strings.validation.required,
       }),
-    contact_number: z
+    phone: z
       .string()
       .nullish()
       .transform((v) => v ?? ''),
-    dob: z
+    address: z
       .string({
         required_error: strings.validation.required,
-        invalid_type_error: strings.validation.required,
       })
       .min(1, {
         message: strings.validation.required,
-      })
-      .transform((v) => v ?? ''),
+      }),
     current_password: z
       .string()
       .nullish()
@@ -94,6 +89,7 @@ const inputSchema = z
       }, strings.validation.allowed_image_formats)
       .nullish()
       .transform((v) => (typeof v === 'string' ? '' : v)),
+    role: z.string().min(1, { message: strings.validation.required }),
   })
   .refine(
     (data) =>
@@ -125,7 +121,15 @@ const inputSchema = z
       path: ['new_password'],
     }
   );
+
 export type ProfileFormInputs = z.infer<typeof inputSchema>;
+
+const roleOptions = [
+  { value: "admin", label: "admin" },
+  { value: "driver", label: "driver" },
+  { value: "operator", label: "operator" },
+  { value: "passenger", label: "passenger" },
+]
 
 const ProfileForm: FC<{ user: User }> = ({ user }) => {
   const form = useForm<ProfileFormInputs>({
@@ -136,6 +140,7 @@ const ProfileForm: FC<{ user: User }> = ({ user }) => {
     },
   });
 
+
   const [open, setOpen] = useState(false);
 
   const [image, setImage] = useState('');
@@ -144,17 +149,21 @@ const ProfileForm: FC<{ user: User }> = ({ user }) => {
   const { mutate, isPending } = useUpdateUser();
 
   const onSubmit = (inputs: ProfileFormInputs) => {
+
     mutate({
       id: user.id,
-      params: inputs,
+      userData: inputs,
     });
   };
 
   useEffect(() => {
-    if (user.image) {
+    if (user && user.image) {
       setImage(user.image);
+    } else {
+      setImage('');
     }
   }, [user]);
+
 
   return (
     <>
@@ -260,34 +269,6 @@ const ProfileForm: FC<{ user: User }> = ({ user }) => {
                 </div>
                 <FormField
                   control={form.control}
-                  name='dob'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className='font-medium'>
-                        Date of Birth
-                      </FormLabel>
-                      <FormControl>
-                        <div className='w-full'>
-                          <DatePicker
-                            onChange={(value) => {
-                              field.onChange(
-                                value
-                                  ? moment(value as Date).format('YYYY-MM-DD')
-                                  : value
-                              );
-                            }}
-                            value={field.value}
-                            maxDate={new Date()}
-                            format='dd/MM/yyyy'
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name='email'
                   render={({ field }) => (
                     <FormItem>
@@ -303,12 +284,75 @@ const ProfileForm: FC<{ user: User }> = ({ user }) => {
                     </FormItem>
                   )}
                 />
+                <div className='grid gap-x-10 sm:grid-cols-2'>
+                  <FormField
+                    control={form.control}
+                    name='phone'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone</FormLabel>
+                        <FormControl>
+                          <Input
+                            type='text'
+                            {...field}
+                            className='border-primary focus-visible:ring-offset-0'
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name='role'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role</FormLabel>
+                        {user.role === 'admin' ? (
+                          <Controller
+                            control={form.control}
+                            name="role"
+                            render={({ field }) => (
+                              <Select
+                                value={roleOptions.find(option => option.value === field.value) || null}
+                                onChange={(option) => {
+                                  field.onChange(option?.value);
+                                }}
+                                options={roleOptions}
+                                menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                isClearable
+                                menuPlacement="auto"
+                                styles={{
+                                  menuPortal: (base) => ({
+                                    ...base,
+                                    zIndex: 9991,
+                                  }),
+                                  input: (base) => ({ ...base, 'input:focus': { boxShadow: 'none' } }),
+                                }}
+                              />
+                            )}
+                          />
+                        ) : (
+                          <FormControl>
+                            <Input
+                              type='text'
+                              value={user.role}
+                              disabled
+                              className='border-primary focus-visible:ring-offset-0'
+                            />
+                          </FormControl>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <FormField
                   control={form.control}
-                  name='contact_number'
+                  name='address'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Contact Number</FormLabel>
+                      <FormLabel>Address</FormLabel>
                       <FormControl>
                         <Input
                           type='text'

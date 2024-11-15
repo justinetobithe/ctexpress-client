@@ -11,13 +11,11 @@ import useStore from '@/store/useStore';
 const AppSidebar = () => {
   const session = useSession();
   const { isSidebarOpen } = useStore((state) => state.app);
-
-  console.log("session", session)
-
+ 
   return (
     <aside
       className={`${isSidebarOpen ? 'fixed translate-x-0 !h-full' : 'w-0 -translate-x-full'
-        } top-[4.4rem] z-50 h-[calc(100vh-theme(spacing.20))] overflow-y-auto bg-white transition-transform sm:sticky`}
+        } top-[4.4rem] z-50 h-[calc(100vh-theme(spacing.20))] overflow-y-auto bg-white transition-transform sm:sticky w-[250px]`}
     >
       <nav className='relative z-50 border-t-[1px] border-[#E5E7EB] bg-white px-5 pb-5 pt-5'>
         {session?.data?.user && (

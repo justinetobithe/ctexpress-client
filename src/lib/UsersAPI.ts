@@ -5,9 +5,9 @@ import { UserPaginatedData } from '@/types/User';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import User from '@/types/User';
 import { UserInput } from '@/components/AppUserForm';
+import { ProfileFormInputs } from '@/app/(protected)/profile/components/ProfileForm'
 import { getServerSession } from 'next-auth';
 import AuthOptions from '@/lib/AuthOptions';
-
 
 export const getUsers = async (
   page: number = 1,
@@ -53,7 +53,7 @@ export const createUser = async (inputs: UserInput): Promise<Response> => {
   return response.data;
 };
 
-export const updateUser = async (id: string, inputs: UserInput): Promise<Response> => {
+export const updateUser = async (id: string, inputs: UserInput | ProfileFormInputs): Promise<Response> => {
   const response = await api.put<Response>(`/api/user/${id}`, inputs);
   return response.data;
 };
@@ -81,7 +81,7 @@ export const useCreateUser = () => {
 
 export const useUpdateUser = () => {
   return useMutation({
-    mutationFn: async ({ id, userData }: { id: string; userData: UserInput }) => {
+    mutationFn: async ({ id, userData }: { id: string; userData: UserInput | ProfileFormInputs }) => {
       return await updateUser(id, userData);
     },
     onSuccess: async (response) => {
