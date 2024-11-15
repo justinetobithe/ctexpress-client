@@ -114,39 +114,6 @@ const AppUserForm: FC<AppUserFormProps> = ({ data, isOpen, onClose, queryClient 
                         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
                             <FormField
                                 control={form.control}
-                                name="role"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Role</FormLabel>
-                                        <Controller
-                                            control={form.control}
-                                            name="role"
-                                            render={({ field }) => (
-                                                <Select
-                                                    value={roleOptions.find(option => option.value === field.value) || null}
-                                                    onChange={(option) => {
-                                                        field.onChange(option?.value);
-                                                    }}
-                                                    options={roleOptions}
-                                                    menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
-                                                    isClearable
-                                                    menuPlacement="auto"
-                                                    styles={{
-                                                        menuPortal: (base) => ({
-                                                            ...base,
-                                                            zIndex: 9991,
-                                                        }),
-                                                        input: (base) => ({ ...base, 'input:focus': { boxShadow: 'none' } }),
-                                                    }}
-                                                />
-                                            )}
-                                        />
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
                                 name='first_name'
                                 render={({ field }) => (
                                     <FormItem>
@@ -206,6 +173,29 @@ const AppUserForm: FC<AppUserFormProps> = ({ data, isOpen, onClose, queryClient 
                                         <FormControl>
                                             <Input type='text' {...field} />
                                         </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="role"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Role</FormLabel>
+                                        <Controller
+                                            control={form.control}
+                                            name="role"
+                                            render={({ field }) => (
+                                                <Select
+                                                    value={roleOptions.find(option => option.value === field.value) || null}
+                                                    onChange={(option) => {
+                                                        field.onChange(option?.value);
+                                                    }}
+                                                    options={roleOptions}
+                                                />
+                                            )}
+                                        />
                                         <FormMessage />
                                     </FormItem>
                                 )}

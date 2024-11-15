@@ -126,7 +126,7 @@ const AppVehicleForm: FC<AppVehicleFormProps> = ({ data, isOpen, onClose, queryC
                                 name="driver_id"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Role</FormLabel>
+                                        <FormLabel>Driver</FormLabel>
                                         <Controller
                                             control={form.control}
                                             name="driver_id"

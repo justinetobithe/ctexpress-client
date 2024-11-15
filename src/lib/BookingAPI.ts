@@ -29,6 +29,11 @@ export const getBookings = async (
     };
 };
 
+export const updateBooking = async (id: number, inputs: Booking): Promise<Response> => {
+    const response = await api.put<Response>(`/api/booking/${id}`, inputs);
+    return response.data;
+};
+
 export const useBookings = (
     page: number = 1,
     pageSize: number = 10,
@@ -42,3 +47,19 @@ export const useBookings = (
             return await getBookings(page, pageSize, globalFilter, sortColumn, sortDesc);
         },
     });
+
+export const useUpdateBooking = () => {
+    return useMutation({
+        mutationFn: async ({ id, bookingData }: { id: number; bookingData: Booking }) => {
+            return await updateBooking(id, bookingData);
+        },
+        onSuccess: (response) => {
+            if (response && response.status === "success") {
+                toast({
+                    variant: 'success',
+                    description: response.message,
+                });
+            }
+        },
+    });
+};

@@ -67,7 +67,7 @@ export const useCreateTerminal = () => {
         },
         onSuccess: (response) => {
             if (response && response.status === "success") {
-                queryClient.invalidateQueries({ queryKey: ['trips'] });
+                queryClient.invalidateQueries({ queryKey: ['terminals'] });
                 toast({
                     variant: 'success',
                     description: response.message,

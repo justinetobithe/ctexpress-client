@@ -20,12 +20,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Switch } from "@/components/ui/switch";
 import Select from "react-select";
 import moment from 'moment';
+import { useUpdateBooking } from '@/lib/BookingAPI';
 
 const bookingSchema = z.object({
     id: z.number().optional(),
-    status: z.string().optional(),
-    paid: z.number().optional(),
+    user_id: z.number(),
+    trip_id: z.number(),
+    status: z.string(),
+    paid: z.boolean().optional(),
+    booked_at: z.string(),
 });
+
 
 export type BookingInput = z.infer<typeof bookingSchema>;
 
@@ -43,8 +48,11 @@ const AppBookingForm: FC<AppBookingFormProps> = ({ data, isOpen, onClose, queryC
         resolver: zodResolver(bookingSchema),
         defaultValues: {
             id: data?.id,
+            user_id: data?.user_id || undefined,
+            trip_id: data?.trip_id,
+            booked_at: data?.booked_at,
             status: data?.status ?? 'pending',
-            paid: data?.paid ?? 0,
+            paid: Boolean(data?.paid ?? false),
         },
     });
 
@@ -52,23 +60,23 @@ const AppBookingForm: FC<AppBookingFormProps> = ({ data, isOpen, onClose, queryC
         if (data) {
             form.reset({
                 status: data.status ?? 'pending',
-                paid: data.paid ?? 0,
+                paid: Boolean(data.paid ?? false),
             });
         }
     }, [data, form]);
 
-    const { mutate: updateTerminal, isPending: isUpdating } = useUpdateTerminal();
+    const { mutate: updateBooking, isPending: isUpdating } = useUpdateBooking();
 
     const onSubmit = async (formData: BookingInput) => {
         setLoading(true);
 
         if (data && data.id) {
-            await updateTerminal(
-                { id: data.id, terminalData: formData },
+            await updateBooking(
+                { id: data.id, bookingData: formData },
                 {
                     onSettled: () => {
                         onClose();
-                        queryClient.invalidateQueries({ queryKey: ['trips'] });
+                        queryClient.invalidateQueries({ queryKey: ['bookings'] });
                     },
                 }
             );
@@ -168,7 +176,7 @@ const AppBookingForm: FC<AppBookingFormProps> = ({ data, isOpen, onClose, queryC
                                         <FormLabel>Paid</FormLabel>
                                         <FormControl>
                                             <Switch
-                                                checked={field.value == 1 ? true : false}
+                                                checked={field.value || false}
                                                 onCheckedChange={field.onChange}
                                             />
                                         </FormControl>

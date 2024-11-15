@@ -22,6 +22,7 @@ import { Booking } from '@/types/Booking';
 import { useBookings } from '@/lib/BookingAPI';
 import { useQueryClient } from '@tanstack/react-query';
 import moment from 'moment';
+import AppBookingForm from './AppBookingForm';
 
 export default function AppBookingsTable() {
     const queryClient = useQueryClient();
@@ -31,6 +32,8 @@ export default function AppBookingsTable() {
     });
     const [searchKeyword, setSearchKeyword] = React.useState('');
     const [sorting, setSorting] = useState<SortingState>([]);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
     const { data, isLoading } = useBookings(
         pageIndex + 1,
@@ -51,6 +54,11 @@ export default function AppBookingsTable() {
             default:
                 return 'black';
         }
+    };
+
+    const handleEditBooking = (booking: Booking) => {
+        setSelectedBooking(booking);
+        setIsEditDialogOpen(true);
     };
 
     const columns: ColumnDef<Booking>[] = [
@@ -172,6 +180,7 @@ export default function AppBookingsTable() {
                                     type='button'
                                     variant="outline"
                                     className="mr-2"
+                                    onClick={() => handleEditBooking(row.original)}
                                 >
                                     <Pencil className="h-4 w-4" />
                                 </Button>
@@ -214,7 +223,14 @@ export default function AppBookingsTable() {
     return (
         <div>
             <AppTable table={table} />
-
+            {selectedBooking && (
+                <AppBookingForm
+                    data={selectedBooking}
+                    isOpen={isEditDialogOpen}
+                    onClose={() => setIsEditDialogOpen(false)}
+                    queryClient={queryClient}
+                />
+            )}
         </div>
     );
 }

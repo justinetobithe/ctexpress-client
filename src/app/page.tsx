@@ -3,9 +3,23 @@ import React, { useEffect, useState } from 'react';
 import Logo from '@public/img/logo.png';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Trip } from '@/types/Trip';
+import axios from 'axios';
+
+// Define the baseURL from environment variables
+const baseURL = process.env.NEXT_PUBLIC_API_URL;
+
+// Create an Axios instance with baseURL
+const api = axios.create({
+  baseURL: baseURL,
+});
 
 const page = () => {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
+  const [vehiclesAvailable, setVehiclesAvailable] = useState<number>(0);
+  const [ongoingVehicles, setOngoingVehicles] = useState<number>(0);
+  const [nextDepartureTime, setNextDepartureTime] = useState<string>('');
+  const [awaitingVehicles, setAwaitingVehicles] = useState<Trip[]>([]);
 
   useEffect(() => {
     setCurrentTime(new Date());
@@ -13,6 +27,57 @@ const page = () => {
       setCurrentTime(new Date());
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const fetchAvailableVehicles = async () => {
+      try {
+        const response = await api.get('/api/status-board/vehicles-available');
+        if (response.data.status) {
+          setVehiclesAvailable(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching available vehicles:", error);
+      }
+    };
+
+    const fetchOngoingVehicles = async () => {
+      try {
+        const response = await api.get('/api/status-board/ongoing-vehicles');
+        if (response.data.status) {
+          setOngoingVehicles(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching ongoing vehicles:", error);
+      }
+    };
+
+    const fetchNextDeparture = async () => {
+      try {
+        const response = await api.get('/api/status-board/next-trip');
+        if (response.data.status) {
+          setNextDepartureTime(response.data.data?.start_time);
+        }
+      } catch (error) {
+        console.error("Error fetching next departure time:", error);
+      }
+    };
+
+    const fetchAwaitingVehicles = async () => {
+      try {
+        const response = await api.get('/api/status-board/awaiting-vehicles');
+        if (response.data.status) {
+          setAwaitingVehicles(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching awaiting vehicles:", error);
+      }
+    };
+
+    fetchAvailableVehicles();
+    fetchOngoingVehicles();
+    fetchNextDeparture();
+    fetchAwaitingVehicles();
   }, []);
 
   const vehicles = [
@@ -30,7 +95,6 @@ const page = () => {
     };
     return date.toLocaleDateString(undefined, options);
   };
-
 
   return (
     <>
@@ -61,25 +125,25 @@ const page = () => {
           <div className='grid grid-cols-3 gap-6 px-10'>
             <div className='bg-white p-10 rounded-lg shadow-md'>
               <h2 className='text-4xl font-bold mb-4'>Vehicles Available</h2>
-              <p className='text-7xl font-semibold text-green-600'>12</p>
+              <p className="text-7xl font-semibold text-green-600">{vehiclesAvailable}</p>
             </div>
             <div className='bg-white p-10 rounded-lg shadow-md'>
               <h2 className='text-4xl font-bold mb-4'>Vehicles On the Way</h2>
-              <p className='text-7xl font-semibold text-yellow-600'>8</p>
+              <p className="text-7xl font-semibold text-yellow-600">{ongoingVehicles}</p>
             </div>
             <div className='bg-white p-10 rounded-lg shadow-md'>
               <h2 className='text-4xl font-bold mb-4'>Next Departure Time</h2>
-              <p className='text-6xl font-semibold text-blue-600'>10:30 AM</p>
+              <p className="text-6xl font-semibold text-blue-600">{nextDepartureTime}</p>
             </div>
           </div>
         </section>
         <section className='vehicles-container w-full py-10'>
           <h2 className='text-5xl font-bold mb-8 text-center'>Vehicles Waiting for Passengers</h2>
           <div className='grid grid-cols-3 gap-6 px-10'>
-            {vehicles.map((vehicle) => (
-              <div key={vehicle.id} className='bg-white p-10 rounded-lg shadow-md'>
-                <h3 className='text-3xl font-bold mb-4'>{vehicle.name}</h3>
-                <p className='text-2xl'>Capacity: {vehicle.capacity}</p>
+            {awaitingVehicles.map((awaitingVehicle) => (
+              <div key={awaitingVehicle.id} className='bg-white p-10 rounded-lg shadow-md'>
+                <h3 className='text-3xl font-bold mb-4'>{awaitingVehicle.driver?.first_name + " " + awaitingVehicle.driver?.last_name + " - " + awaitingVehicle.driver?.vehicle?.license_plate + " " + awaitingVehicle.driver?.vehicle?.brand + " " + awaitingVehicle.driver?.vehicle?.model}</h3>
+                <p className='text-2xl'>Capacity: {awaitingVehicle.remaining_capacity + "/" + awaitingVehicle.driver?.vehicle?.capacity}</p>
               </div>
             ))}
           </div>
