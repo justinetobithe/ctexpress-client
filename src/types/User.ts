@@ -3,8 +3,8 @@ import { Vehicle } from "./Vehicle";
 // MAIN
 export default interface User {
   id: string;
-  first_name?: string;
-  last_name?: string;
+  first_name: string;
+  last_name: string;
   name?: string;
   email: string;
   phone?: string;
@@ -13,9 +13,9 @@ export default interface User {
   image?: string | null;
   role: string;
   token?: string;
-  email_verified?: string
+  email_verified?: Date | null;
 
-  vehicle?: Vehicle;
+  vehicle: Vehicle | null;
 }
 
 

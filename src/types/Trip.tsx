@@ -1,5 +1,6 @@
-import { User } from "next-auth";
+
 import { Terminal } from "./Terminal";
+import User from "./User";
 import { Vehicle } from "./Vehicle";
 
 export interface Trip {
@@ -18,4 +19,8 @@ export interface Trip {
 
     driver?: User;
     // vehicle?: Vehicle;
+
+    // vehicle?: Vehicle;
+
+    remaining_capacity?: number;
 }

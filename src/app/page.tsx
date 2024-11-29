@@ -14,7 +14,7 @@ const api = axios.create({
   baseURL: baseURL,
 });
 
-const page = () => {
+const Page = () => {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [vehiclesAvailable, setVehiclesAvailable] = useState<number>(0);
   const [ongoingVehicles, setOngoingVehicles] = useState<number>(0);
@@ -141,13 +141,21 @@ const page = () => {
           <h2 className='text-5xl font-bold mb-8 text-center'>Vehicles Waiting for Passengers</h2>
           <div className='grid grid-cols-3 gap-6 px-10'>
             {awaitingVehicles.map((awaitingVehicle) => (
-              <div key={awaitingVehicle.id} className='bg-white p-10 rounded-lg shadow-md'>
-                <h3 className='text-3xl font-bold mb-4'>{awaitingVehicle.driver?.first_name + " " + awaitingVehicle.driver?.last_name + " - " + awaitingVehicle.driver?.vehicle?.license_plate + " " + awaitingVehicle.driver?.vehicle?.brand + " " + awaitingVehicle.driver?.vehicle?.model}</h3>
-                <p className='text-2xl'>Capacity: {awaitingVehicle.remaining_capacity + "/" + awaitingVehicle.driver?.vehicle?.capacity}</p>
+              <div key={awaitingVehicle.id} className="bg-white p-10 rounded-lg shadow-md">
+                <h3 className="text-3xl font-bold mb-4">
+                  {awaitingVehicle.driver?.first_name} {awaitingVehicle.driver?.last_name} -
+                  {awaitingVehicle.driver?.vehicle
+                    ? `${awaitingVehicle.driver?.vehicle?.license_plate} ${awaitingVehicle.driver?.vehicle?.brand} ${awaitingVehicle.driver?.vehicle?.model}`
+                    : "No vehicle assigned"}
+                </h3>
+                <p className="text-2xl">
+                  Capacity: {awaitingVehicle.remaining_capacity}/{awaitingVehicle.driver?.vehicle?.capacity ?? "N/A"}
+                </p>
               </div>
             ))}
           </div>
         </section>
+
         <section className='ads-container w-full mt-10'>
           <h2 className='text-5xl font-bold mb-8 text-center'>Advertisements</h2>
           <div
@@ -168,4 +176,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

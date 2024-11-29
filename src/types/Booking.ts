@@ -7,7 +7,7 @@ export interface Booking {
     trip_id: number;
     booked_at?: string;
     status?: string;
-    paid?: boolean;
+    paid?: boolean | number;
     drop_at?: string | null;
 
     user?: User;

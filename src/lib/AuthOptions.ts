@@ -48,14 +48,21 @@ const AuthOptions: AuthOptions = {
         }
 
         if (response?.data) {
+          const user = response.data.user;
+
+          // Ensure first_name and last_name are strings
           return {
-            ...response.data.user,
+            ...user,
+            first_name: user.first_name ?? "",
+            last_name: user.last_name ?? "",
             auth_token: response.data.token,
+            phone: user.phone ?? "",
           };
         }
 
         return null;
-      },
+      }
+
     }),
     GoogleProvider({
       clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
@@ -94,11 +101,15 @@ const AuthOptions: AuthOptions = {
         }
 
         if (response?.data) {
-          user = {
+          const user = {
             ...response.data.user,
+            first_name: response.data.user.first_name ?? '',
+            last_name: response.data.user.last_name ?? '',
             auth_token: response.data.token,
+            emailVerified: response.data.user.email_verified ?? null,
           };
         }
+
       }
 
       if (user) {

@@ -43,7 +43,8 @@ export default function AppBookingsTable() {
         Boolean(sorting.map((item) => item.desc).join(','))
     );
 
-    const getStatusColor = (status: string) => {
+    const getStatusColor = (status: string | undefined) => {
+        if (!status) return 'black';
         switch (status) {
             case 'pending':
                 return 'orange';
@@ -55,6 +56,7 @@ export default function AppBookingsTable() {
                 return 'black';
         }
     };
+
 
     const handleEditBooking = (booking: Booking) => {
         setSelectedBooking(booking);
@@ -142,13 +144,17 @@ export default function AppBookingsTable() {
                     <ArrowUpDown className='ml-2 h-4 w-4' />
                 </Button>
             ),
-            cell: ({ row }) => (
-                <span className={row.original.paid === 1 ? 'text-green-600' : 'text-red-600'}>
-                    {row.original.paid === 1 ? "Paid" : "Unpaid"}
-                </span>
-            ),
+            cell: ({ row }) => {
+                const isPaid = row.original.paid === 1;
+                return (
+                    <span className={isPaid ? 'text-green-600' : 'text-red-600'}>
+                        {isPaid ? "Paid" : "Unpaid"}
+                    </span>
+                );
+            },
             enableSorting: true,
         },
+
         {
             accessorKey: 'status',
             header: ({ column }) => (

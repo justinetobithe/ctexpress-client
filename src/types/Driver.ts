@@ -14,5 +14,5 @@ export interface Driver {
     token?: string;
     email_verified?: string
 
-    vehicle?: Vehicle;
+    vehicle?: Vehicle | null;
 }

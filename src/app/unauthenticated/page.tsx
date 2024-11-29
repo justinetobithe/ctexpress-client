@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import Link from 'next/link';
 
-export const page: FC = async () => {
+const Page: FC = async () => {
   return (
     <main className='flex h-screen w-screen items-center justify-center bg-white text-center'>
       <div>
@@ -17,4 +17,4 @@ export const page: FC = async () => {
   );
 };
 
-export default page;
+export default Page; 

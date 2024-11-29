@@ -1,3 +1,4 @@
+import { Driver } from "./Driver";
 import User from "./User";
 
 export interface Vehicle {
@@ -9,6 +10,8 @@ export interface Vehicle {
     year?: string;
     capacity?: string;
 
-    driver?: User
+    driver?: Driver
+
+    remaining_capacity?: string
 
 }
