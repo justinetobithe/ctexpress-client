@@ -149,7 +149,7 @@ const Page = () => {
                     : "No vehicle assigned"}
                 </h3>
                 <p className="text-2xl">
-                  Capacity: {awaitingVehicle.remaining_capacity}/{awaitingVehicle.driver?.vehicle?.capacity ?? "N/A"}
+                  Available Capacity: {awaitingVehicle.remaining_capacity}/{awaitingVehicle.driver?.vehicle?.capacity ?? "N/A"}
                 </p>
               </div>
             ))}
