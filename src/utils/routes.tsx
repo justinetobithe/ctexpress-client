@@ -1,0 +1,223 @@
+import React from 'react';
+import {
+  Home,
+  Inbox,
+  User,
+  Album,
+  CalendarDays,
+  File,
+  ShoppingCart,
+  Youtube,
+  BadgeCheck,
+  UserSquare,
+  BookCheck,
+  Users,
+  Wallet,
+  Route,
+  Bus,
+  HomeIcon,
+  FileLock,
+  MapPinIcon,
+  BookUser,
+  Computer
+} from 'lucide-react';
+
+interface Route {
+  route: string;
+  title: string;
+  icon: React.ReactElement | null;
+  roles: string[];
+  isSidebarVisible: boolean;
+  child_routes: Route[] | [];
+}
+const routes: Route[] = [
+  {
+    route: '/home',
+    title: 'Home',
+    icon: <Home />,
+    roles: ['admin', 'operator'],
+    isSidebarVisible: true,
+    child_routes: [],
+  },
+  {
+    route: '/bookings',
+    title: 'Bookings',
+    icon: <BookUser />,
+    roles: ['admin', 'operator'],
+    isSidebarVisible: true,
+    child_routes: [],
+  },
+  {
+    route: '/trip',
+    title: 'Trip',
+    icon: <MapPinIcon />,
+    roles: ['admin', 'operator'],
+    isSidebarVisible: true,
+    child_routes: [],
+  },
+  // {
+  //   route: '/inbox',
+  //   title: 'Inbox',
+  //   icon: <Inbox />,
+  //   roles: ['admin'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
+  // {
+  //   route: '/doctor-appointment-approvals',
+  //   title: 'Doctor Appointment Approvals',
+  //   icon: <BookCheck />,
+  //   roles: ['admin'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
+  // {
+  //   route: '/doctor-validation',
+  //   title: 'Doctor Validation',
+  //   icon: <User />,
+  //   roles: ['admin'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
+  // {
+  //   route: '/doctors-list',
+  //   title: 'Doctors List',
+  //   icon: <Users />,
+  //   roles: ['admin'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
+  // {
+  //   route: '/view-appointments',
+  //   title: 'View Appointments',
+  //   icon: <BookUser />,
+  //   roles: ['ob_gyne'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
+  // {
+  //   route: '/book-appointment',
+  //   title: 'Book Appointment',
+  //   icon: <Album className='scale-x-[-1]' />,
+  //   roles: ['mother'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
+  // {
+  //   route: '/calendar',
+  //   title: 'Calendar',
+  //   icon: <CalendarDays />,
+  //   roles: ['mother', 'ob_gyne'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
+  // {
+  //   route: '/media-files',
+  //   title: 'Files & Media',
+  //   icon: <File />,
+  //   roles: ['mother'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
+  // {
+  //   route: '/pregnancy-products',
+  //   title: 'Pregnancy Products',
+  //   icon: <ShoppingCart />,
+  //   roles: ['mother'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
+
+  {
+    route: '/terminal',
+    title: 'Terminal',
+    icon: <HomeIcon />,
+    roles: ['admin'],
+    isSidebarVisible: true,
+    child_routes: [],
+  },
+
+  {
+    route: '/vehicle',
+    title: 'Vehicle',
+    icon: <Bus />,
+    roles: ['admin'],
+    isSidebarVisible: true,
+    child_routes: [],
+  },
+  // {
+  //   route: '/routes',
+  //   title: 'Route',
+  //   icon: <Route />,
+  //   roles: ['admin'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
+  // {
+  //   route: '/informative-videos',
+  //   title: 'Informative Videos',
+  //   icon: <Youtube />,
+  //   roles: ['mother', 'ob_gyne'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
+  {
+    route: '/payments',
+    title: 'Payments',
+    icon: <Wallet />,
+    roles: ['admin', 'operator'],
+    isSidebarVisible: true,
+    child_routes: [],
+  },
+  // {
+  //   route: '/history',
+  //   title: 'History',
+  //   icon: <FileLock />,
+  //   roles: ['admin'],
+  //   isSidebarVisible: true,
+  //   child_routes: [],
+  // },
+  {
+    route: '/walk-ins',
+    title: 'Walk ins',
+    icon: <Computer />,
+    roles: ['admin', 'operator'],
+    isSidebarVisible: true,
+    child_routes: [],
+  },
+  {
+    route: '/users-list',
+    title: 'Users List',
+    icon: <Users />,
+    roles: ['admin'],
+    isSidebarVisible: true,
+    child_routes: [],
+  },
+  {
+    route: '/profile',
+    title: 'Profile',
+    icon: <User />,
+    roles: ['admin', 'mother', 'ob_gyne'],
+    isSidebarVisible: true,
+    child_routes: [
+      {
+        route: '/verification',
+        title: 'Verification',
+        icon: <BadgeCheck />,
+        roles: ['ob_gyne'],
+        isSidebarVisible: true,
+        child_routes: [],
+      },
+      {
+        route: '/display-information',
+        title: 'Display Information',
+        icon: <UserSquare />,
+        roles: ['ob_gyne'],
+        isSidebarVisible: true,
+        child_routes: [],
+      },
+    ],
+  },
+];
+
+export default routes;
