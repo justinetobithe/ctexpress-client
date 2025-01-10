@@ -137,7 +137,7 @@ export default function AppTerminalsTable() {
           <ArrowUpDown className='ml-2 h-4 w-4' />
         </Button>
       ),
-      cell: ({ row }) => row.original.amount.toFixed(2),
+      cell: ({ row }) => row.original.amount,
       enableSorting: true,
     },
     {
