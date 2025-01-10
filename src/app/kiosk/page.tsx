@@ -31,13 +31,6 @@ const tripSchema = z.object({
 
 type KioskForm = z.infer<typeof tripSchema>;
 
-export const formatTime = (timeString) => {
-    const [hours, minutes] = timeString.split(':');
-    const hours12 = (hours % 12) || 12;
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    return `${hours12}:${minutes} ${ampm}`;
-};
-
 export default function Page() {
     const queryClient = useQueryClient();
     const [loading, setLoading] = useState(false);
@@ -302,9 +295,7 @@ export default function Page() {
                                                         </div>
 
                                                         <div className="flex justify-between text-gray-600 mt-2">
-                                                            {/* <span>{moment(trip.start_time).format("h:mm A")}</span> */}
-                                                            <span>{formatTime(trip?.start_time)}</span>
-
+                                                            <span>{moment(trip?.start_time, 'HH:mm:ss').format('h:mm A')}</span> 
                                                             <span>
                                                                 Capacity: {trip?.total_occupancy}/{trip?.driver?.vehicle?.capacity}
                                                             </span>
