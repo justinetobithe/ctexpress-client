@@ -158,7 +158,7 @@ export default function Page() {
                 </div>
 
                 <Form {...form}>
-                    {currentStep === 1 && (
+                    {currentStep == 1 && (
                         <form>
                             <h2 className="text-lg font-bold mb-4 text-center">Step 1: Passenger and Trip</h2>
 
@@ -295,7 +295,9 @@ export default function Page() {
                                                         </div>
 
                                                         <div className="flex justify-between text-gray-600 mt-2">
-                                                            <span>{moment(trip.start_time).format("h:mm A")}</span>
+                                                            {/* <span>{moment(trip.start_time).format("h:mm A")}</span> */}
+                                                            <span>{trip?.start_time}</span>
+
                                                             <span>
                                                                 Capacity: {trip?.total_occupancy}/{trip?.driver?.vehicle?.capacity}
                                                             </span>
@@ -414,9 +416,11 @@ export default function Page() {
                                 Next
                             </Button>
                         ) : (
-                            <Button type="button" onClick={handleSubmit(onSubmit)} disabled={isCreating} >
-                                {loading ? <AppSpinner /> : 'Confirm'}
-                            </Button>
+                            watch('payment_method') == "Cash" && (
+                                <Button type="button" onClick={handleSubmit(onSubmit)} disabled={isCreating} >
+                                    {loading ? <AppSpinner /> : 'Confirm'}
+                                </Button>
+                            )
                         )}
                     </div>
                 </Form>

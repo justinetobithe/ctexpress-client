@@ -223,7 +223,7 @@ export default function AppUsersTable() {
         const item = row.original;
         return (
           <div>
-            {item.status === 1 && (
+            {item.status == 1 && (
               <span className="text-green-500">Active</span>
             )}
           </div>
@@ -238,7 +238,7 @@ export default function AppUsersTable() {
         return (
           <div className="flex justify-center items-center">
             <Dialog>
-              {item.status === 0 && (
+              {item.status == 0 && (
                 <AppConfirmationDialog
                   title='Approve User'
                   description={`Are you sure you want to activate the user "${item.first_name} ${item.last_name}"?`}

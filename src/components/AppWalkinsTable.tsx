@@ -171,10 +171,10 @@ export default function AppWalkinsTable() {
             ),
             cell: ({ row }) => (
                 <span
-                    className={`font-medium ${row.original.paid === 1 ? 'text-green-500' : 'text-red-500'
+                    className={`font-medium ${row.original.paid == 1 ? 'text-green-500' : 'text-red-500'
                         }`}
                 >
-                    {row.original.paid === 1 ? 'Paid' : 'Not Paid'}
+                    {row.original.paid == 1 ? 'Paid' : 'Not Paid'}
                 </span>
             ),
             enableSorting: true,
@@ -190,7 +190,7 @@ export default function AppWalkinsTable() {
                             <Tooltip>
                                 <TooltipTrigger>
                                     <Dialog>
-                                        {item.paid === 0 && (
+                                        {item.paid == 0 && (
                                             <AppConfirmationDialog
                                                 title="Mark as Paid"
                                                 description="Are you sure you want to mark this transaction as paid? This action cannot be undone."

@@ -59,7 +59,7 @@ export default function AppBookingsTable() {
     const { mutate: markAsPaid } = useMarkAsPaid();
 
     const handleMarkAsPaid = (id: number) => {
-        markAsPaid({ id, paid: 1}, {
+        markAsPaid({ id, paid: 1 }, {
             onSettled: () => {
                 queryClient.invalidateQueries({
                     queryKey: ['bookings']
@@ -150,7 +150,7 @@ export default function AppBookingsTable() {
                 </Button>
             ),
             cell: ({ row }) => {
-                const isPaid = row.original.paid === 1;
+                const isPaid = row.original.paid == 1;
                 return (
                     <span className={isPaid ? 'text-green-600' : 'text-red-600'}>
                         {isPaid ? "Paid" : "Unpaid"}
@@ -190,7 +190,7 @@ export default function AppBookingsTable() {
                             <Tooltip>
                                 <TooltipTrigger>
                                     <Dialog>
-                                        {item.paid === 0 && (
+                                        {item.paid == 0 && (
                                             <AppConfirmationDialog
                                                 title="Mark as Paid"
                                                 description="Are you sure you want to mark this transaction as paid? This action cannot be undone."
