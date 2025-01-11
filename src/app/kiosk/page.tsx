@@ -19,6 +19,7 @@ import { useCreateKiosk } from "@/lib/KioskAPI";
 import { useQueryClient } from '@tanstack/react-query';
 import moment from "moment";
 import Image from "next/image";
+import { laravelEcho } from "@/utils/pusher";
 
 const tripSchema = z.object({
     name: z.string().nonempty("Passenger name is required."),
@@ -42,6 +43,7 @@ export default function Page() {
     const [selectedToTerminal, setSelectedToTerminal] = useState<number | null>(null);
     const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
     const [iframeURL, setIframeURL] = useState<string | null>(null);
+    const [paymentIntentId, setPaymentIntentId] = useState("")
 
     const { mutate: createKiosk, isPending: isCreating } = useCreateKiosk();
 
@@ -132,6 +134,27 @@ export default function Page() {
     };
 
     const handleBack = () => setCurrentStep(prev => prev - 1);
+
+    useEffect(() => {
+        laravelEcho('App.Events')
+            .private('paymongo.paid')
+            .listen('PaymongoPaidEvent', async (response: { data: { payment_intent_id: string } }) => {
+                const { data } = response
+                if (data.payment_intent_id == paymentIntentId) {
+                    await createKiosk(form.getValues(), {
+                        onSettled: () => {
+                            setIframeURL(null);
+                            setCurrentStep(1);
+                            form.reset();
+                            setSelectedFromTerminal(null);
+                            setSelectedToTerminal(null);
+                            setSelectedTrip(null);
+                            queryClient.invalidateQueries({ queryKey: ['kiosks'] });
+                        },
+                    });
+                }
+            })
+    }, [paymentIntentId, createKiosk, form, queryClient]);
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -295,7 +318,7 @@ export default function Page() {
                                                         </div>
 
                                                         <div className="flex justify-between text-gray-600 mt-2">
-                                                            <span>{moment(trip?.start_time, 'HH:mm:ss').format('h:mm A')}</span> 
+                                                            <span>{moment(trip?.start_time, 'HH:mm:ss').format('h:mm A')}</span>
                                                             <span>
                                                                 Capacity: {trip?.total_occupancy}/{trip?.driver?.vehicle?.capacity}
                                                             </span>
@@ -344,6 +367,7 @@ export default function Page() {
                                                                     phone: watch("phone"),
                                                                 });
                                                                 setIframeURL(response.data.url);
+                                                                setPaymentIntentId(response.data.payment_intent_id)
                                                             } catch (error) {
                                                                 console.error("Error fetching checkout URL:", error);
                                                                 toast({
