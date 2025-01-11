@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { api } from '@/lib/api';
 
-const Page = async () => {
+const Page = () => {   
 
   const [passengers, setPassengers] = useState<number>(0);
   const [vehicles, setVehicles] = useState<number>(0);
@@ -85,4 +85,4 @@ const Page = async () => {
   );
 };
 
-export default Page;   
+export default Page;  
