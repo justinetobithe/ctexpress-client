@@ -10,7 +10,7 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'nurturemoms.xyz',
+        hostname: 'ctexpress.site',
         port: '',
         pathname: '/**',
       },
