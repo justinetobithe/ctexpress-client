@@ -37,7 +37,7 @@ const Page = () => {
       try {
         const response = await api.get('/api/dashboard/vehicles');
         if (response.data.data) {
-          setVehicles(response.data.data?.start_time);
+          setVehicles(response.data.data);
         }
       } catch (error) {
         console.error("Error fetching next departure time:", error);
