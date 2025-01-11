@@ -44,6 +44,7 @@ export default function Page() {
     const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
     const [iframeURL, setIframeURL] = useState<string | null>(null);
     const [paymentIntentId, setPaymentIntentId] = useState("")
+    const [paymentMethod, setPaymentMethod] = useState("")
 
     const { mutate: createKiosk, isPending: isCreating } = useCreateKiosk();
 
@@ -141,20 +142,44 @@ export default function Page() {
             .listen('PaymongoPaidEvent', async (response: { data: { payment_intent_id: string } }) => {
                 const { data } = response
                 if (data.payment_intent_id == paymentIntentId) {
-                    await createKiosk(form.getValues(), {
-                        onSettled: () => {
-                            setIframeURL(null);
-                            setCurrentStep(1);
-                            form.reset();
-                            setSelectedFromTerminal(null);
-                            setSelectedToTerminal(null);
-                            setSelectedTrip(null);
-                            queryClient.invalidateQueries({ queryKey: ['kiosks'] });
-                        },
+
+                    const res = await api.post("/api/payment/checkout", {
+                        payment_method: paymentMethod,
+                        description: `${selectedTrip?.terminal_from?.name} to ${selectedTrip?.terminal_to?.name}`,
+                        amount: parseFloat(selectedTrip?.fare_amount ?? '0'),
+                        name: watch("name"),
+                        email: watch("email"),
+                        phone: watch("phone"),
                     });
+
+                    if (res) {
+                        setIframeURL(null);
+                        setCurrentStep(1);
+                        form.reset();
+                        setSelectedFromTerminal(null);
+                        setSelectedToTerminal(null);
+                        setSelectedTrip(null);
+                    }
+
+                    // const formData = {
+                    //     ...form.getValues(),
+                    //     payment_method: paymentMethod
+                    // }
+
+                    // await createKiosk(formData, {
+                    //     onSettled: () => {
+                    //         setIframeURL(null);
+                    //         setCurrentStep(1);
+                    //         form.reset();
+                    //         setSelectedFromTerminal(null);
+                    //         setSelectedToTerminal(null);
+                    //         setSelectedTrip(null);
+                    //         queryClient.invalidateQueries({ queryKey: ['kiosks'] });
+                    //     },
+                    // });
                 }
             })
-    }, [paymentIntentId, createKiosk, form, queryClient]);
+    }, [paymentIntentId, paymentMethod, selectedTrip]);
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -356,6 +381,7 @@ export default function Page() {
                                                     variant={field.value === method ? "default" : "outline"}
                                                     onClick={async () => {
                                                         field.onChange(method);
+                                                        setPaymentMethod(method)
                                                         if (method === "gcash" || method === "paymaya") {
                                                             try {
                                                                 const response = await api.post("/api/payment/checkout", {
