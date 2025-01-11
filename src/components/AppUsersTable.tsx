@@ -85,12 +85,12 @@ export default function AppUsersTable() {
       cell: ({ row }) => {
         const item = row.original;
         const image = item.image;
- 
+
         let imageUrl = image;
         if (image) {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL;
           if (apiUrl) {
-            imageUrl = `${apiUrl}/storage/${image.replace('app/public/', '')}`;
+            imageUrl = `${apiUrl}/storage/app/public/image/${image}`;
           }
         }
 
