@@ -94,6 +94,8 @@ export default function AppUsersTable() {
           }
         }
 
+        console.log("imageUrl", imageUrl);
+
         return imageUrl ? (
           <>
             <Image
