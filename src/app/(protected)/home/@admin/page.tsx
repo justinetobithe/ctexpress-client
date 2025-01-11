@@ -1,13 +1,53 @@
-import { api } from '@/lib/api';
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+"use client"
 
-const page = async () => {
-  // const { data } = await api.get<{
-  //   passengers_count: number;
-  //   drivers_count: number;
-  //   vehicles_count: number;
-  // }>('/api/admin/dashboard');
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { api } from '@/lib/api';
+
+const Page = async () => {
+
+  const [passengers, setPassengers] = useState<number>(0);
+  const [vehicles, setVehicles] = useState<number>(0);
+  const [drivers, setDrivers] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchPassengers = async () => {
+      try {
+        const response = await api.get('/api/dashboard/passengers');
+        if (response.data.data) {
+          setPassengers(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching available vehicles:", error);
+      }
+    };
+
+    const fetchDrivers = async () => {
+      try {
+        const response = await api.get('/api/dashboard/drivers');
+        if (response.data.data) {
+          setDrivers(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching ongoing vehicles:", error);
+      }
+    };
+
+    const fetchVehicles = async () => {
+      try {
+        const response = await api.get('/api/dashboard/vehicles');
+        if (response.data.data) {
+          setVehicles(response.data.data?.start_time);
+        }
+      } catch (error) {
+        console.error("Error fetching next departure time:", error);
+      }
+    };
+
+    fetchPassengers();
+    fetchDrivers();
+    fetchVehicles();
+  }, []);
 
   return (
     <div className='flex space-x-5'>
@@ -16,7 +56,7 @@ const page = async () => {
           <CardContent className='flex h-full items-center justify-center p-6 text-center'>
             <div className='space-y-5'>
               <h4 className='text-[2rem] font-semibold'>Number of Passengers</h4>
-              {/* <p className='text-5xl font-bold'>{data.passengers_count}</p> */}
+              <p className='text-5xl font-bold'>{passengers}</p>
             </div>
           </CardContent>
         </Card>
@@ -26,7 +66,7 @@ const page = async () => {
           <CardContent className='flex h-full items-center justify-center p-6 text-center'>
             <div className='space-y-5'>
               <h4 className='text-[2rem] font-semibold'>Number of Drivers</h4>
-              {/* <p className='text-5xl font-bold'>{data.drivers_count}</p> */}
+              <p className='text-5xl font-bold'>{drivers}</p>
             </div>
           </CardContent>
         </Card>
@@ -36,7 +76,7 @@ const page = async () => {
           <CardContent className='flex h-full items-center justify-center p-6 text-center'>
             <div className='space-y-5'>
               <h4 className='text-[2rem] font-semibold'>Number of Vehicles</h4>
-              {/* <p className='text-5xl font-bold'>{data.vehicles_count}</p> */}
+              <p className='text-5xl font-bold'>{vehicles}</p>
             </div>
           </CardContent>
         </Card>
@@ -45,4 +85,4 @@ const page = async () => {
   );
 };
 
-export default page;
+export default Page;   
