@@ -142,44 +142,25 @@ export default function Page() {
             .listen('PaymongoPaidEvent', async (response: { data: { payment_intent_id: string } }) => {
                 const { data } = response
                 if (data.payment_intent_id == paymentIntentId) {
-
-                    const res = await api.post("/api/payment/checkout", {
-                        payment_method: paymentMethod,
-                        description: `${selectedTrip?.terminal_from?.name} to ${selectedTrip?.terminal_to?.name}`,
-                        amount: parseFloat(selectedTrip?.fare_amount ?? '0'),
-                        name: watch("name"),
-                        email: watch("email"),
-                        phone: watch("phone"),
-                    });
-
-                    if (res) {
-                        setIframeURL(null);
-                        setCurrentStep(1);
-                        form.reset();
-                        setSelectedFromTerminal(null);
-                        setSelectedToTerminal(null);
-                        setSelectedTrip(null);
+                    const formData = {
+                        ...form.getValues(),
+                        payment_method: paymentMethod
                     }
 
-                    // const formData = {
-                    //     ...form.getValues(),
-                    //     payment_method: paymentMethod
-                    // }
-
-                    // await createKiosk(formData, {
-                    //     onSettled: () => {
-                    //         setIframeURL(null);
-                    //         setCurrentStep(1);
-                    //         form.reset();
-                    //         setSelectedFromTerminal(null);
-                    //         setSelectedToTerminal(null);
-                    //         setSelectedTrip(null);
-                    //         queryClient.invalidateQueries({ queryKey: ['kiosks'] });
-                    //     },
-                    // });
+                    await createKiosk(formData, {
+                        onSettled: () => {
+                            setIframeURL(null);
+                            setCurrentStep(1);
+                            form.reset();
+                            setSelectedFromTerminal(null);
+                            setSelectedToTerminal(null);
+                            setSelectedTrip(null);
+                            queryClient.invalidateQueries({ queryKey: ['kiosks'] });
+                        },
+                    });
                 }
             })
-    }, [paymentIntentId, paymentMethod, selectedTrip]);
+    }, [paymentIntentId, createKiosk, form, paymentMethod, queryClient]);
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-50">
