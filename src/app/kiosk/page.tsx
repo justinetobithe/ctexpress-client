@@ -141,7 +141,11 @@ export default function Page() {
             .private('paymongo.paid')
             .listen('PaymongoPaidEvent', async (response: { data: { payment_intent_id: string } }) => {
                 const { data } = response
+
+                console.log("data checkout", data)
+
                 if (data.payment_intent_id == paymentIntentId) {
+
                     const formData = {
                         ...form.getValues(),
                         payment_method: paymentMethod
