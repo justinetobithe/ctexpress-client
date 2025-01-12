@@ -152,7 +152,7 @@ const AppTripForm: FC<AppTripFormProps> = ({ data, isOpen, onClose, queryClient 
                             name="driver_id"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Driver</FormLabel>
+                                    <FormLabel>Driver & Vehicle</FormLabel>
                                     <Controller
                                         control={form.control}
                                         name="driver_id"
@@ -160,7 +160,7 @@ const AppTripForm: FC<AppTripFormProps> = ({ data, isOpen, onClose, queryClient 
                                             <Select
                                                 value={drivers.find(driver => driver.id === field.value) ? {
                                                     value: field.value,
-                                                    label: `${drivers.find(driver => driver.id === field.value)?.first_name} - ${drivers.find(driver => driver.id === field.value)?.last_name}`,
+                                                    label: `${drivers.find(driver => driver.id === field.value)?.first_name} ${drivers.find(driver => driver.id === field.value)?.last_name} - ${drivers.find(driver => driver.id === field.value)?.vehicle?.brand} ${drivers.find(driver => driver.id === field.value)?.vehicle?.model} (${drivers.find(driver => driver.id === field.value)?.vehicle?.license_plate})`,
                                                 } : null}
                                                 options={drivers.map(driver => ({
                                                     value: driver.id!,
