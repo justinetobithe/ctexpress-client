@@ -119,8 +119,9 @@ export default function Page() {
             await createKiosk(formData, {
                 onSettled: (response) => {
                     if (response && response.data) {
-                        console.log("response", response)
-                        setKiosk(response.data.data as Kiosk);
+                        const kioskData = response.data.data as Kiosk;
+                        setKiosk(kioskData);
+
                         toast({
                             variant: 'success',
                             description: 'Kiosk created successfully!',
@@ -168,7 +169,8 @@ export default function Page() {
                     await createKiosk(formData, {
                         onSettled: (response) => {
                             if (response && response.data) {
-                                setKiosk(response.data.data as Kiosk);
+                                const kioskData = response.data.data as Kiosk;
+                                setKiosk(kioskData);
                                 toast({
                                     variant: 'success',
                                     description: 'Kiosk created successfully!',
