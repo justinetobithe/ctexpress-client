@@ -17,9 +17,11 @@ import { toast } from '@/components/ui/use-toast';
 import AppSpinner from "@/components/AppSpinner";
 import { useCreateKiosk } from "@/lib/KioskAPI";
 import { useQueryClient } from '@tanstack/react-query';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import moment from "moment";
 import Image from "next/image";
 import { laravelEcho } from "@/utils/pusher";
+import { Kiosk } from "@/types/Kiosk";
 
 const tripSchema = z.object({
     name: z.string().nonempty("Passenger name is required."),
@@ -45,6 +47,8 @@ export default function Page() {
     const [iframeURL, setIframeURL] = useState<string | null>(null);
     const [paymentIntentId, setPaymentIntentId] = useState("")
     const [paymentMethod, setPaymentMethod] = useState("")
+    const [showDialog, setShowDialog] = useState(false);
+    const [kiosk, setKiosk] = useState<Kiosk | null>(null);
 
     const { mutate: createKiosk, isPending: isCreating } = useCreateKiosk();
 
@@ -113,7 +117,16 @@ export default function Page() {
         setLoading(true);
         try {
             await createKiosk(formData, {
-                onSettled: () => {
+                onSettled: (response) => {
+                    if (response && response.data) {
+                        console.log("response", response)
+                        // setKiosk(response);
+                        toast({
+                            variant: 'success',
+                            description: 'Kiosk created successfully!',
+                        });
+                        setShowDialog(true)
+                    }
                     setIframeURL(null);
                     setCurrentStep(1);
                     form.reset();
@@ -152,7 +165,15 @@ export default function Page() {
                     }
 
                     await createKiosk(formData, {
-                        onSettled: () => {
+                        onSettled: (response) => {
+                            if (response && response.data) {
+                                console.log("response", response)
+                                toast({
+                                    variant: 'success',
+                                    description: 'Kiosk created successfully!',
+                                });
+                                setShowDialog(true)
+                            }
                             setIframeURL(null);
                             setCurrentStep(1);
                             form.reset();
@@ -345,8 +366,6 @@ export default function Page() {
                             ) : (
                                 <div className="text-center text-gray-500">No available trips found.</div>
                             )}
-
-
                         </form>
                     )}
 
@@ -457,6 +476,29 @@ export default function Page() {
                         )}
                     </div>
                 </Form>
+
+                <Dialog open={showDialog} onOpenChange={setShowDialog}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Booking Details</DialogTitle>
+                        </DialogHeader>
+                        <div>
+                            {/* {kiosk && (
+                                <ul>
+                                    <li><strong>Name:</strong> {kiosk.name}</li>
+                                    <li><strong>Email:</strong> {kiosk.email}</li>
+                                    <li><strong>Phone:</strong> {kiosk.phone}</li>
+                                    <li><strong>Trip:</strong> {kiosk.}</li>
+                                    <li><strong>Payment Method:</strong> {kiosk.payment_method}</li>
+                                    <li><strong>Amount to Pay:</strong> {kiosk.amount_to_pay}</li>
+                                </ul>
+                            )} */}
+                        </div>
+                        <DialogFooter>
+                            <Button onClick={() => setShowDialog(false)}>Close</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div >
         </div >
     );
