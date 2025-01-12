@@ -164,7 +164,7 @@ const AppTripForm: FC<AppTripFormProps> = ({ data, isOpen, onClose, queryClient 
                                                 } : null}
                                                 options={drivers.map(driver => ({
                                                     value: driver.id!,
-                                                    label: `${driver.first_name} - ${driver.last_name}`,
+                                                    label: `${driver.first_name} ${driver.last_name} - ${driver?.vehicle?.brand} ${driver?.vehicle?.model} (${driver?.vehicle?.license_plate})`,
                                                 }))}
                                                 onChange={option => field.onChange(option?.value)}
                                                 isClearable
