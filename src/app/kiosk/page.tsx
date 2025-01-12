@@ -507,7 +507,7 @@ export default function Page() {
                                         <strong>Payment Method:</strong> {kiosk.payment_method}
                                     </li>
                                     <li>
-                                        <strong>Status:</strong> {kiosk.paid === 0 ? "Pending" : "Paid"}
+                                        <strong>Status:</strong> {kiosk.paid == 0 ? "Pending" : "Paid"}
                                     </li>
                                 </ul>
                             )}
