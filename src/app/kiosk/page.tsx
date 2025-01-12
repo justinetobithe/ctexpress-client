@@ -120,7 +120,7 @@ export default function Page() {
                 onSettled: (response) => {
                     if (response && response.data) {
                         console.log("response", response)
-                        // setKiosk(response);
+                        setKiosk(response.data.data as Kiosk);
                         toast({
                             variant: 'success',
                             description: 'Kiosk created successfully!',
@@ -167,7 +167,7 @@ export default function Page() {
                     await createKiosk(formData, {
                         onSettled: (response) => {
                             if (response && response.data) {
-                                console.log("response", response)
+                                setKiosk(response.data.data as Kiosk);
                                 toast({
                                     variant: 'success',
                                     description: 'Kiosk created successfully!',
@@ -483,16 +483,34 @@ export default function Page() {
                             <DialogTitle>Booking Details</DialogTitle>
                         </DialogHeader>
                         <div>
-                            {/* {kiosk && (
+                            {kiosk && (
                                 <ul>
-                                    <li><strong>Name:</strong> {kiosk.name}</li>
-                                    <li><strong>Email:</strong> {kiosk.email}</li>
-                                    <li><strong>Phone:</strong> {kiosk.phone}</li>
-                                    <li><strong>Trip:</strong> {kiosk.}</li>
-                                    <li><strong>Payment Method:</strong> {kiosk.payment_method}</li>
-                                    <li><strong>Amount to Pay:</strong> {kiosk.amount_to_pay}</li>
+                                    <li>
+                                        <strong>Name:</strong> {kiosk.name}
+                                    </li>
+                                    <li>
+                                        <strong>Email:</strong> {kiosk.email}
+                                    </li>
+                                    <li>
+                                        <strong>Phone:</strong> {kiosk.phone}
+                                    </li>
+                                    <li>
+                                        <strong>Trip:</strong> {kiosk.trip?.terminal_from?.name} - {kiosk.trip?.terminal_to?.name}
+                                    </li>
+                                    <li>
+                                        <strong>Date:</strong> {kiosk.trip?.trip_date}
+                                    </li>
+                                    <li>
+                                        <strong>Time:</strong> {kiosk.trip?.start_time}
+                                    </li>
+                                    <li>
+                                        <strong>Payment Method:</strong> {kiosk.payment_method}
+                                    </li>
+                                    <li>
+                                        <strong>Status:</strong> {kiosk.paid === 0 ? "Pending" : "Paid"}
+                                    </li>
                                 </ul>
-                            )} */}
+                            )}
                         </div>
                         <DialogFooter>
                             <Button onClick={() => setShowDialog(false)}>Close</Button>
